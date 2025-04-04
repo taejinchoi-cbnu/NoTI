@@ -7,5 +7,11 @@ public class RegisterResponse {
         this.message = message;
     }
 
-    // getter
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
 }
