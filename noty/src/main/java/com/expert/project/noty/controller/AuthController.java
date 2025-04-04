@@ -1,6 +1,7 @@
 package com.expert.project.noty.controller;
 
 import com.expert.project.noty.dto.LoginRequest;
+import com.expert.project.noty.dto.LoginResponse;
 import com.expert.project.noty.dto.RegisterRequest;
 import com.expert.project.noty.dto.RegisterResponse;
 import com.expert.project.noty.service.UserService;
@@ -35,13 +36,14 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         String result = userService.login(request.getUserId(), request.getPassword());
 
         if (result.equals("로그인 성공")) {
-            return ResponseEntity.ok(result);
+            return ResponseEntity.ok(new LoginResponse("로그인 성공"));
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new LoginResponse("로그인 실패"));
         }
     }
 }
