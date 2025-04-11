@@ -21,3 +21,5 @@ FE - 04/04 까지 전체적인 design layout 완성, xml파일에 splash, sign-i
 
 04/04 FE : 로그인 페이지 버튼 구현 완, 메인 페이지 디자인
 04/11까지 모든 페이지 레이아웃 초안 및 버튼으로 레이아웃 이동 가능하게 만들기
+
+https://www.figma.com/design/sPi9rSbq23GeknYaOIGXbA/Aplication-of-Open-Source-SW-Project?node-id=112-2&t=OywBicqtnaS75pLa-0
