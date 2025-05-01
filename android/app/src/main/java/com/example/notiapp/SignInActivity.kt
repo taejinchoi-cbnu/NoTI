@@ -19,6 +19,12 @@ class SignInActivity : AppCompatActivity() {
             val intent = Intent(this, SignUpActivity::class.java)
             startActivity(intent)
         }
+
+        findViewById<Button>(R.id.signInBtn).setOnClickListener {
+            // 메인 페이지로 이동
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
         
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.SignInmain)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())

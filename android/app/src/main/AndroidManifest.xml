@@ -2,6 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -13,6 +18,14 @@
         android:theme="@style/Theme.NotiApp"
         tools:targetApi="31">
         <activity
+            android:name=".ItemRecordingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".item_recording.xml"
+            android:exported="false"
+            android:label="@string/title_activity_item_recording.xml"
+            android:theme="@style/Theme.NotiApp" />
+        <activity
             android:name=".splashActivity"
             android:exported="true">
             <intent-filter>
@@ -21,15 +34,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".SignUpActivity"
             android:exported="false" />
-
         <activity
             android:name=".SignInActivity"
             android:exported="false" />
-
         <activity
             android:name=".MainActivity"
             android:exported="true" />
