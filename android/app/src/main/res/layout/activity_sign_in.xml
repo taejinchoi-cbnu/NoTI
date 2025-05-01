@@ -20,12 +20,12 @@
         app:srcCompat="@drawable/logowhite" />
 
     <EditText
-        android:id="@+id/signInEmail"
+        android:id="@+id/signInUserId"
         android:layout_width="0dp"
         android:layout_height="48dp"
         android:layout_marginTop="32dp"
-        android:hint="@string/email_hint"
-        android:inputType="textEmailAddress"
+        android:hint="아이디를 입력하세요"
+        android:inputType="text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/signInLogo"
@@ -52,7 +52,7 @@
         android:inputType="textPassword"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/signInEmail"
+        app:layout_constraintTop_toBottomOf="@+id/signInUserId"
         app:layout_constraintWidth_percent="0.8" />
 
     <Button

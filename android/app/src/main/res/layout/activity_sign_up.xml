@@ -12,7 +12,6 @@
         android:id="@+id/signUpLogo"
         android:layout_width="0dp"
         android:layout_height="186dp"
-        android:layout_marginTop="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -32,6 +31,18 @@
         app:layout_constraintWidth_percent="0.8" />
 
     <EditText
+        android:id="@+id/signUpNickname"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:hint="닉네임을 입력하세요"
+        android:inputType="text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/signUpName"
+        app:layout_constraintWidth_percent="0.8" />
+
+    <EditText
         android:id="@+id/signUpEmail"
         android:layout_width="0dp"
         android:layout_height="48dp"
@@ -40,7 +51,7 @@
         android:inputType="textEmailAddress"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/signUpName"
+        app:layout_constraintTop_toBottomOf="@+id/signUpNickname"
         app:layout_constraintWidth_percent="0.8" />
 
     <EditText
