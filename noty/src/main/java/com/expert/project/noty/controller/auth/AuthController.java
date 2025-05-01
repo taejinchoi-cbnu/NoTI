@@ -1,18 +1,13 @@
-package com.expert.project.noty.controller;
+package com.expert.project.noty.controller.auth;
 
-import com.expert.project.noty.dto.LoginRequest;
-import com.expert.project.noty.dto.LoginResponse;
-import com.expert.project.noty.dto.RegisterRequest;
-import com.expert.project.noty.dto.RegisterResponse;
-import com.expert.project.noty.service.UserService;
+import com.expert.project.noty.dto.auth.*;
+import com.expert.project.noty.service.auth.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
@@ -36,14 +31,26 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
-        String result = userService.login(request.getUserId(), request.getPassword());
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        String result = userService.login(request);
 
         if (result.equals("로그인 성공")) {
             return ResponseEntity.ok(new LoginResponse("로그인 성공"));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new LoginResponse("로그인 실패"));
+        }
+    }
+
+    @PostMapping("/modify")
+    public ResponseEntity<ModifyResponse> modify(@RequestBody ModifyRequest request) {
+        String result = userService.modify(request);
+
+        if (result.equals("비밀번호 변경 성공")) {
+            return ResponseEntity.ok(new ModifyResponse("비밀번호 변경 성공"));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ModifyResponse("비밀번호 변경 실패"));
         }
     }
 }

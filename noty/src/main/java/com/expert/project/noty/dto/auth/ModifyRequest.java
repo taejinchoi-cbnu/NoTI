@@ -1,8 +1,9 @@
 package com.expert.project.noty.dto.auth;
 
-public class LoginRequest {
+public class ModifyRequest {
     private String userId;
-    private String password;
+    private String newPassword;
+
 
     public String getUserId() {
         return userId;
@@ -12,11 +13,11 @@ public class LoginRequest {
         this.userId = userId;
     }
 
-    public String getPassword() {
-        return password;
+    public String getNewPassword() {
+        return newPassword;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
     }
 }

@@ -1,11 +1,19 @@
-POST http://localhost:8080/auth/register
+POST http://localhost:8080/auth/login
 Content-Type: application/json
 
 {
-  "userId": "test5",
-  "password": "1234",
-  "nickname": "테스트",
-  "email": "test@example.com"
+"userId": "test",
+"password": "1234"
+}
+
+###
+
+POST http://localhost:8080/auth/modify
+Content-Type: application/json
+
+{
+  "userId": "test",
+  "newPassword": "12345"
 }
 
 ###
@@ -14,6 +22,9 @@ POST http://localhost:8080/auth/login
 Content-Type: application/json
 
 {
-"userId": "test1",
-"password": "1234"
+  "userId": "test",
+  "password": "12345"
 }
+
+### Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJ0ZXN0Iiwicm9sZSI6IlJPTEVfQURNSU4iLCJpYXQiOjE3NDYwMjYxNjQsImV4cCI6MTc0NjAyODc1Nn0.llMXAxHQToRaCfTTn4NF_I6aWYPdJ1G8wBGhZC9kH04
+### 아이디 test 비밀번호 1234 위 토큰으로 로그인

@@ -1,12 +1,11 @@
 package com.expert.project.noty.dto.auth;
 
-public class LoginResponse {
+public class ModifyResponse {
     private String message;
 
-    public LoginResponse(String message) {
+    public ModifyResponse(String message) {
         this.message = message;
     }
-
 
     public String getMessage() {
         return message;
