@@ -119,8 +119,7 @@ class SignInActivity : AppCompatActivity() {
                     .writeTimeout(15, TimeUnit.SECONDS)
                     .build()
 
-                // 요청 생성
-                // JSON으로 요청을 보내는 경우 (현재 코드와 유사)
+                // JSON으로 요청을 보내는 경우
                 val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
                 val requestBody = jsonData.toRequestBody(mediaType)
                 val request = Request.Builder()
@@ -131,23 +130,83 @@ class SignInActivity : AppCompatActivity() {
 
                 // 요청 실행
                 client.newCall(request).execute().use { response ->
-                    val responseBody = response.body?.string()
-                    Log.d(TAG, "서버 응답: ${response.code} - $responseBody")
+                    val responseBody = response.body?.string() ?: ""
+                    Log.d(TAG, "서버 응답 코드: ${response.code}")
+                    Log.d(TAG, "서버 응답 본문: '$responseBody'") // 작은따옴표로 감싸서 빈 응답도 확인 가능
 
                     // UI 스레드에서 결과 처리
                     runOnUiThread {
                         signInButton.isEnabled = true
 
                         if (response.isSuccessful) {
-                            Toast.makeText(this, "로그인 성공!", Toast.LENGTH_SHORT).show()
+                            try {
+                                if (responseBody.isNotEmpty()) {
+                                    // JSON 응답 처리
+                                    val jsonResponse = JSONObject(responseBody)
 
-                            // 로그인 성공 시 메인 화면으로 이동
-                            val intent = Intent(this, MainActivity::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            startActivity(intent)
-                            finish() // 현재 화면 종료
+                                    // 응답에 token 필드가 있는지 확인
+                                    if (jsonResponse.has("token")) {
+                                        val token = jsonResponse.getString("token")
+
+                                        // 토큰을 SharedPreferences에 저장
+                                        val sharedPreferences = getSharedPreferences("auth_prefs", MODE_PRIVATE)
+                                        sharedPreferences.edit()
+                                            .putString("jwt_token", token)
+                                            .apply()
+
+                                        Log.d(TAG, "JWT 토큰 저장 완료")
+                                    } else if (jsonResponse.has("jwt") || jsonResponse.has("accessToken")) {
+                                        // 다른 가능한 토큰 필드명 시도
+                                        val token = if (jsonResponse.has("jwt"))
+                                            jsonResponse.getString("jwt")
+                                        else
+                                            jsonResponse.getString("accessToken")
+
+                                        // 토큰을 SharedPreferences에 저장
+                                        val sharedPreferences = getSharedPreferences("auth_prefs", MODE_PRIVATE)
+                                        sharedPreferences.edit()
+                                            .putString("jwt_token", token)
+                                            .apply()
+
+                                        Log.d(TAG, "JWT 토큰 저장 완료 (대체 필드명)")
+                                    } else {
+                                        // 토큰 필드를 찾을 수 없음
+                                        Log.w(TAG, "응답에 토큰 필드가 없습니다: $responseBody")
+                                        // 그래도 로그인은 성공했으므로 계속 진행
+                                    }
+                                } else {
+                                    // 응답 본문이 비어있음
+                                    Log.w(TAG, "서버 응답이 비어있습니다")
+                                    // 토큰이 헤더에 있을 수 있으므로 헤더 확인
+                                    val authHeader = response.header("Authorization")
+                                    if (!authHeader.isNullOrEmpty() && authHeader.startsWith("Bearer ")) {
+                                        val token = authHeader.substring(7) // "Bearer " 제거
+
+                                        // 토큰을 SharedPreferences에 저장
+                                        val sharedPreferences = getSharedPreferences("auth_prefs", MODE_PRIVATE)
+                                        sharedPreferences.edit()
+                                            .putString("jwt_token", token)
+                                            .apply()
+
+                                        Log.d(TAG, "JWT 토큰 저장 완료 (Authorization 헤더)")
+                                    }
+                                }
+
+                                // 로그인 성공 처리 계속 진행
+                                Toast.makeText(this, "로그인 성공!", Toast.LENGTH_SHORT).show()
+
+                                // 로그인 성공 시 대시보드로 이동
+                                val intent = Intent(this, DashBoardActivity::class.java)
+                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                startActivity(intent)
+                                finish() // 현재 화면 종료
+
+                            } catch (e: Exception) {
+                                Log.e(TAG, "응답 처리 중 오류 발생: ${e.message}", e)
+                                Toast.makeText(this, "로그인 응답 처리 중 오류가 발생했습니다", Toast.LENGTH_LONG).show()
+                            }
                         } else {
-                            // 서버 오류 처리
+                            // 서버 오류 처리 (기존 코드 유지)
                             val errorMessage = when (response.code) {
                                 401 -> "아이디 또는 비밀번호가 일치하지 않습니다."
                                 404 -> "서버를 찾을 수 없습니다."
@@ -158,6 +217,7 @@ class SignInActivity : AppCompatActivity() {
                         }
                     }
                 }
+
             } catch (e: IOException) {
                 Log.e(TAG, "네트워크 오류: ${e.message}", e)
 

@@ -5,34 +5,24 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".DashBoardActivity">
 
     <Button
-        android:id="@+id/BtnRecord"
+        android:id="@+id/goToRec"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="녹음"
+        android:text="녹음하러가기"
         app:layout_constraintBottom_toTopOf="@+id/guideline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/recordingStatusText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="녹음 대기 중"
-        app:layout_constraintEnd_toEndOf="@+id/BtnRecord"
-        app:layout_constraintStart_toStartOf="@+id/BtnRecord"
-        app:layout_constraintTop_toBottomOf="@+id/BtnRecord" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.3" />
+        app:layout_constraintGuide_percent="0.2" />
 
     <TextView
         android:id="@+id/recordingsTitle"
