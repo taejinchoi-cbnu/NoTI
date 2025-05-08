@@ -1,0 +1,205 @@
+[33mcommit 3e54d2ce9ec13dc099a5b34311b4f21b0f6bb76f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: taejinchoi-cbnu <xowls000@chungbuk.ac.kr>
+Date:   Fri May 2 10:22:37 2025 +0900
+
+    feat: 녹음 기능 구현
+
+[33mcommit 90b547c2fd1bea6a2bf02f39ab99f60e97bb117d[m
+Author: taejinchoi-cbnu <xowls000@chungbuk.ac.kr>
+Date:   Thu May 1 18:38:39 2025 +0900
+
+    안드로이드 수정
+
+[33mcommit f4067bc9fe466c3b372a1c770409add49194bb05[m
+Author: taejinchoi-cbnu <xowls000@chungbuk.ac.kr>
+Date:   Thu May 1 18:36:50 2025 +0900
+
+    로그인 수정
+
+[33mcommit 39fc360c72975ca2268d03de3e31c62bd750b7e3[m
+Author: ujin999 <epahg789@gmail.com>
+Date:   Thu May 1 14:01:27 2025 +0900
+
+    file, login api
+
+[33mcommit fe9e2778d88824c0ab118c9fed8ba253bc901dbd[m
+Author: taejinchoi-cbnu <xowls000@chungbuk.ac.kr>
+Date:   Thu May 1 13:36:47 2025 +0900
+
+    Feat: 녹음 기능 구현
+
+[33mcommit 5c1c52f3e7e9ece25e2091156badaf8f6a14a512[m
+Author: ujin999 <epahg789@gmail.com>
+Date:   Fri Apr 11 11:42:02 2025 +0900
+
+    pigma url
+
+[33mcommit 4e95cecbdafb6079747c1aa69bd4f1be085e2c5e[m
+Author: ujin999 <epahg789@gmail.com>
+Date:   Fri Apr 11 09:57:11 2025 +0900
+
+    pigma url
+
+[33mcommit 777af868fd27e1d3cb2516b03a8cc2025a99c3fa[m
+Author: ujin999 <epahg789@gmail.com>
+Date:   Thu Apr 10 23:46:53 2025 +0900
+
+    프로젝트 계획서
+
+[33mcommit 0732219c334b9b68b498d6a119592d32d177d510[m
+Author: ujin999 <epahg789@gmail.com>
+Date:   Fri Apr 4 13:55:35 2025 +0900
+
+    record file
+
+[33mcommit fef5c0d67a4b9a2d5cc45e7d0c2cb4de98b6409c[m
+Author: ujin999 <epahg789@gmail.com>
+Date:   Fri Apr 4 13:27:10 2025 +0900
+
+    로그인 수정
+
+[33mcommit 419cb647805a86429bc0fcde434cc2145ed09fae[m
+Author: ujin999 <epahg789@gmail.com>
+Date:   Fri Apr 4 13:16:11 2025 +0900
+
+    스프링 오류 수정
+
+[33mcommit a54e36e51203184ffcde43a5b17e22f6f3c90e75[m
+Author: ujin999 <epahg789@gmail.com>
+Date:   Fri Apr 4 12:59:30 2025 +0900
+
+    팀 활동일지
+
+[33mcommit 730d4ab43f6743fbe9bb136c84caf12aac5fa762[m
+Author: ujin999 <epahg789@gmail.com>
+Date:   Fri Apr 4 12:57:42 2025 +0900
+
+    git ignore
+
+[33mcommit af3a99c341a53c9910acbd9665c4e52d6d014a31[m
+Author: ujin999 <epahg789@gmail.com>
+Date:   Fri Apr 4 12:52:39 2025 +0900
+
+    gitignore
+
+[33mcommit e5a48bf85e9db34ca6a9eee96d7a9cb2bcbcaab8[m
+Author: ujin999 <epahg789@gmail.com>
+Date:   Fri Apr 4 12:42:40 2025 +0900
+
+    스프링 커밋
+
+[33mcommit 974275fffd725ffc373fdb0e5a14812a9a461042[m
+Author: taejinchoi-cbnu <xowls000@chungbuk.ac.kr>
+Date:   Fri Apr 4 11:20:33 2025 +0900
+
+    record_layout 초안
+
+[33mcommit 187d8706dcfe7d4905804ac71a82004f250f1261[m
+Author: taejinchoi-cbnu <xowls000@chungbuk.ac.kr>
+Date:   Fri Apr 4 11:17:29 2025 +0900
+
+    Update Team_Activity_Record.txt
+    
+    04/04 FE 일지
+
+[33mcommit b2e6128cd44797e21b2139720220af5115264d95[m
+Author: gcotsh <ymin0120@gmail.com>
+Date:   Fri Apr 4 11:15:26 2025 +0900
+
+    Main activity 초안
+
+[33mcommit fd05f94b3cc94e5e31d716529ae4184f20156ac7[m
+Author: taejinchoi-cbnu <xowls000@chungbuk.ac.kr>
+Date:   Fri Apr 4 10:02:07 2025 +0900
+
+    서버 연결 제외 auth 구현
+
+[33mcommit ced0fdae5d7f7a5883f63e11521010be2e749ad7[m
+Author: ujin999 <epahg789@gmail.com>
+Date:   Fri Apr 4 09:43:53 2025 +0900
+
+    파일정리
+
+[33mcommit c88b419e9cab897dc43b1f6858c04fdb54454aba[m
+Author: ujin999 <epahg789@gmail.com>
+Date:   Fri Apr 4 09:12:12 2025 +0900
+
+    파일 정리
+
+[33mcommit 71bb26cfaa37b8651d7212c5adc78f2278bead72[m
+Merge: c8be7d2 c263c92
+Author: taejinchoi-cbnu <xowls000@chungbuk.ac.kr>
+Date:   Sun Mar 30 16:46:55 2025 +0900
+
+    Merge branch 'main' of https://github.com/ujin999/NoTI
+
+[33mcommit c8be7d2bdb7be9169064e80bbd4374f5a7ee4cb3[m
+Author: taejinchoi-cbnu <xowls000@chungbuk.ac.kr>
+Date:   Sun Mar 30 16:44:21 2025 +0900
+
+    로그인, 회원가입 화면 구현
+
+[33mcommit c263c92ab93ff60c8d5a115a90d368f8e89b4a86[m
+Author: gcotsh <ymin0120@gmail.com>
+Date:   Sat Mar 29 21:35:37 2025 +0900
+
+    Add files via upload
+
+[33mcommit cbb48dcec7111abd41d9d1e06b0cbf40c350468a[m
+Author: taejinchoi-cbnu <xowls000@chungbuk.ac.kr>
+Date:   Fri Mar 28 14:14:53 2025 +0900
+
+    splash 화면 구현
+
+[33mcommit 7ede22df6166fa5497d1e331aa4c6107db7a0426[m
+Author: taejinchoi-cbnu <xowls000@chungbuk.ac.kr>
+Date:   Fri Mar 28 13:33:47 2025 +0900
+
+    제발 commit
+
+[33mcommit 6753ffca17a476ac43a0be66c0ffe5cf764e649c[m
+Author: taejinchoi-cbnu <xowls000@chungbuk.ac.kr>
+Date:   Fri Mar 28 13:23:21 2025 +0900
+
+    Initial commit
+
+[33mcommit 659c476d39da9ee2efa92865b2afdca6e535cafa[m
+Author: taejinchoi-cbnu <xowls000@chungbuk.ac.kr>
+Date:   Fri Mar 28 12:35:09 2025 +0900
+
+    Update Team_Activity_Record.txt
+
+[33mcommit 43f5adfc621a9f67f79dad5a0a1847c199da3cbb[m
+Author: taejinchoi-cbnu <xowls000@chungbuk.ac.kr>
+Date:   Fri Mar 28 11:48:02 2025 +0900
+
+    Update Team_Activity_Record.txt
+    
+    FE 회의 기록
+
+[33mcommit 4abe8e161d0c39c82421d11a6804cb6493092f85[m
+Author: taejinchoi-cbnu <xowls000@chungbuk.ac.kr>
+Date:   Fri Mar 28 11:43:23 2025 +0900
+
+    Create README.md
+
+[33mcommit 6655319d28b28cc5a5750de8f4bee1891c215ace[m
+Merge: 6925eb7 09e5927
+Author: WooJin <110900977+ujin999@users.noreply.github.com>
+Date:   Fri Mar 28 11:29:35 2025 +0900
+
+    Merge pull request #1 from ujin999/ujin
+    
+    3월 28일 팀 활동 기록
+
+[33mcommit 09e592700ab127fc643bc62d0ceb12811d2cd050[m[33m ([m[1;31morigin/ujin[m[33m)[m
+Author: WooJin <110900977+ujin999@users.noreply.github.com>
+Date:   Fri Mar 28 11:29:03 2025 +0900
+
+    3월 28일 팀 활동 기록
+
+[33mcommit 6925eb74900f45cd1d8253f86e4a5a670996ddd1[m
+Author: WooJin <110900977+ujin999@users.noreply.github.com>
+Date:   Fri Mar 28 11:15:57 2025 +0900
+
+    Create Team_Activity_Record.txt
