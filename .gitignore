@@ -255,3 +255,9 @@ hs_err_pid*
 !/gradle/wrapper/gradle-wrapper.jar
 
 # End of https://www.toptal.com/developers/gitignore/api/androidstudio,intellij
+
+/noty/uploads/audio/*
+!/noty/uploads/audio/.gitkeep
+
+/noty/src/main/resources/openAi.properties
+/noty/src/main/resources/geminiAi.properties
