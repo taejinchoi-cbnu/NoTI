@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_home"
+        android:icon="@drawable/ic_home"
+        android:title="전체 보드" />
+
+    <item
+        android:id="@+id/navigation_chatbot"
+        android:icon="@drawable/ic_chatbot"
+        android:title="나만의 비서" />
+
+    <item
+        android:id="@+id/navigation_user"
+        android:icon="@drawable/ic_user"
+        android:title="내정보" />
+
+</menu>
