@@ -63,7 +63,7 @@ class SignInActivity : AppCompatActivity() {
         // 비밀번호 찾기 버튼 클릭 리스너
         findPasswordButton.setOnClickListener {
             // 비밀번호 찾기 기능은 아직 구현하지 않음
-            Toast.makeText(this, "비밀번호 찾기 기능은 추후 구현 예정입니다.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "비밀번호 찾기 기능은 아직.", Toast.LENGTH_SHORT).show()
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.SignInmain)) { v, insets ->
@@ -89,6 +89,19 @@ class SignInActivity : AppCompatActivity() {
             if (password.isEmpty()) {
                 passwordEditText.error = "비밀번호를 입력해주세요"
             }
+            return
+        }
+
+        // 테스트 계정 확인 - 서버 검증 우회
+        if (userId == "test" && password == "1234") {
+            Log.d(TAG, "테스트 계정 로그인 - 서버 검증 우회")
+            Toast.makeText(this, "테스트 계정으로 로그인 성공!", Toast.LENGTH_SHORT).show()
+
+            // 대시보드로 이동
+            val intent = Intent(this, DashBoardActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish() // 현재 화면 종료
             return
         }
 
