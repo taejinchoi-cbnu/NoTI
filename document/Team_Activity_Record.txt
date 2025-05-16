@@ -24,6 +24,8 @@ FE - 04/04 까지 전체적인 design layout 완성, xml파일에 splash, sign-i
 
 https://www.figma.com/design/sPi9rSbq23GeknYaOIGXbA/Aplication-of-Open-Source-SW-Project?node-id=112-2&t=OywBicqtnaS75pLa-
 
+https://www.notion.so/1ee78130257c802ebb98f997ef0e59c8?pvs=4
+
 4/11 주요 기능 구현이 우선. 회의의 시작은 ppt자료로 시작함. ppt자료를 공유할 수 있어야 함. 다같이 공유하고 수정할 수 있게, 그리고 일정 시간마다 요약본을 확인할 수 있게 만들어야 함. 다같이 공유하고 수정할 수 있게... 구글 독스?
 
 팀프로젝트 계획서 작성0
