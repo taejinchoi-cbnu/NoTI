@@ -47,7 +47,7 @@ public class SecurityConfig {
                 .formLogin((auth) -> auth.disable()) // form login disable
                 .httpBasic((auth) -> auth.disable()) // http basic disable
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/example/register", "/example/login", "/join").permitAll()
+                        .requestMatchers("/example/register", "/example/login", "/join", "/auth/register").permitAll()
                         .requestMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 // jwt 토큰을 정보를 확인하고 인증하는 필터

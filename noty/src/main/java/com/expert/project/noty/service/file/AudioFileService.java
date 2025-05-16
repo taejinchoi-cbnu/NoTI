@@ -3,6 +3,7 @@ package com.expert.project.noty.service.file;
 import com.expert.project.noty.dto.file.AudioUploadRequest;
 import com.expert.project.noty.entity.AudioFileEntity;
 import com.expert.project.noty.repository.AudioFileRepository;
+import com.expert.project.noty.service.ai.AudioProcessingService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -23,9 +24,12 @@ public class AudioFileService {
     private String baseDir;
 
     private final AudioFileRepository audioFileRepository;
+    private final AudioProcessingService audioProcessingService;
 
-    public AudioFileService(AudioFileRepository audioFileRepository) {
+
+    public AudioFileService(AudioFileRepository audioFileRepository, AudioProcessingService audioProcessingService) {
         this.audioFileRepository = audioFileRepository;
+        this.audioProcessingService = audioProcessingService;
     }
 
     public String saveAudio(AudioUploadRequest request) throws IOException {
@@ -44,8 +48,6 @@ public class AudioFileService {
         System.out.println("파일 이름: " + file.getOriginalFilename());
         System.out.println("파일 크기: " + file.getSize());
 
-//        file.transferTo(filePath.toFile());
-
         try {
             file.transferTo(filePath.toFile());
         } catch (IOException e) {
@@ -55,6 +57,10 @@ public class AudioFileService {
         }
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // AI 비동기 처리
+        audioProcessingService.processAudioAsync(filePath.toFile(), username);
+        System.out.println("File path : " + filePath.toFile().getName());
 
         AudioFileEntity audioFileEntity = new AudioFileEntity();
         audioFileEntity.setOriginalName(file.getOriginalFilename());

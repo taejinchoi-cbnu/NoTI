@@ -2,6 +2,8 @@ package com.expert.project.noty.controller.file;
 
 
 import com.expert.project.noty.dto.file.AudioUploadRequest;
+import com.expert.project.noty.service.ai.GeminiService;
+import com.expert.project.noty.service.ai.WhisperService;
 import com.expert.project.noty.service.file.AudioFileService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,5 +39,4 @@ public class FileController {
                     .body("파일 저장 실패: " + e.getMessage());
         }
     }
-
 }

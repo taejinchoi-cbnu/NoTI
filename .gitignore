@@ -261,3 +261,4 @@ hs_err_pid*
 
 /noty/src/main/resources/openAi.properties
 /noty/src/main/resources/geminiAi.properties
+/whisper/notyenv/*

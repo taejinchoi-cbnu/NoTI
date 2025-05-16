@@ -12,6 +12,5 @@ public class AudioUploadRequest {
 
     private MultipartFile file;
 
-    private String originalName;
     private Integer duration;
 }
