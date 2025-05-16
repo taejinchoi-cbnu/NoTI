@@ -5,6 +5,6 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class SummationResponse {
-    private String summation;
+public class STTResponse {
+    private String stt;
 }

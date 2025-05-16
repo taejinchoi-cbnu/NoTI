@@ -17,6 +17,8 @@ public class SummationEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String summation;
+    private String stt;
+
     private String savedFileName;
 
     private String userId;

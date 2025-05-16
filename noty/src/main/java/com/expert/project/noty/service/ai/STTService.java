@@ -1,6 +1,6 @@
 package com.expert.project.noty.service.ai;
 
-import com.expert.project.noty.dto.ai.currentserver.SummationResponse;
+import com.expert.project.noty.dto.ai.currentserver.STTResponse;
 import com.expert.project.noty.entity.AudioFileEntity;
 import com.expert.project.noty.entity.SummationEntity;
 import com.expert.project.noty.exception.ResourceNotFoundException;
@@ -20,7 +20,7 @@ public class STTService {
         this.summationRepository = summationRepository;
     }
 
-    public SummationResponse getSummationBySavedFileName(String savedFileName, String userId) {
+    public STTResponse getSummationBySavedFileName(String savedFileName, String userId) {
 
         // savedFileName으로 audio 파일 찾기
         AudioFileEntity audioFileEntity = audioFileRepository.findBySavedName(savedFileName)
@@ -33,6 +33,6 @@ public class STTService {
 
         System.out.println("summation: " + summationEntity.getSummation());
 
-        return new SummationResponse(summationEntity.getSummation());
+        return new STTResponse(summationEntity.getSummation());
     }
 }

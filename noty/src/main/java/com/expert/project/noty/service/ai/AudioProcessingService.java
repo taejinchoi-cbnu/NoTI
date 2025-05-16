@@ -34,14 +34,14 @@ public class AudioProcessingService {
     public void processAudioAsync(File audioFile, String username) {
         try {
             // AI 처리 로직 (예: Whisper API 호출)
-            String summary = whisperService.transcribe(audioFile).join();
+            String stt = whisperService.transcribe(audioFile).join();
 
             Optional<AudioFileEntity> audioFileEntity = audioFileRepository.findBySavedName(audioFile.getName());
 
             // 결과 저장 또는 후속 작업
-            System.out.println("요약 결과: " + summary);
+            System.out.println("요약 결과: " + stt);
             // DB 저장
-            if (summary != null) {
+            if (stt != null) {
                 SummationEntity summation = new SummationEntity();
                 summation.setSavedFileName(audioFile.getName());
 
@@ -49,7 +49,7 @@ public class AudioProcessingService {
 
                 summation.setUploadDate(LocalDateTime.now());
                 summation.setUserId(username);
-                summation.setSummation(summary);
+                summation.setStt(stt);
                 summationRepository.save(summation);
             }
 
