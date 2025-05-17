@@ -31,7 +31,7 @@ public class STTService {
                         savedFileName, userId, audioFileEntity.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Summation not found"));
 
-        System.out.println("summation: " + summationEntity.getSummation());
+//        System.out.println("summation: " + summationEntity.getSummation());
 
         return new STTResponse(summationEntity.getSummation());
     }

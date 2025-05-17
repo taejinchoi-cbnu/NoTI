@@ -1,0 +1,10 @@
+package com.expert.project.noty.dto.ai.currentserver;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class GeminiPromptRequest {
+    private String savedFileName;
+}
