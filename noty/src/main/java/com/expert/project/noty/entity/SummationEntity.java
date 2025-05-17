@@ -1,9 +1,6 @@
 package com.expert.project.noty.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,6 +14,9 @@ public class SummationEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String summation;
+
+    @Lob // 대용량 객체로 정의
+    @Column(columnDefinition = "MEDIUMTEXT") // MySQL에서 MEDIUMTEXT로 정의
     private String stt;
 
     private String savedFileName;

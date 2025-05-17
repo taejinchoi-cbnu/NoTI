@@ -96,6 +96,16 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String token = jwtUtil.createJwt(username, role, 30L * 24 * 60 * 60 * 1000); // 한달
 
         response.addHeader("Authorization", "Bearer " + token);
+
+        // 응답 본문에도 토큰 포함 (JSON 형식)
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        try {
+            String tokenJson = "{\"token\":\"" + token + "\", \"userId\":\"" + username + "\", \"role\":\"" + role + "\"}";
+            response.getWriter().write(tokenJson);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

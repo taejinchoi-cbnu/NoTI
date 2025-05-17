@@ -22,6 +22,7 @@ public class STTService {
 
     public STTResponse getSummationBySavedFileName(String savedFileName, String userId) {
 
+        System.out.println(savedFileName);
         // savedFileName으로 audio 파일 찾기
         AudioFileEntity audioFileEntity = audioFileRepository.findBySavedName(savedFileName)
                 .orElseThrow(() -> new ResourceNotFoundException("Audio file not found"));
@@ -33,6 +34,6 @@ public class STTService {
 
 //        System.out.println("summation: " + summationEntity.getSummation());
 
-        return new STTResponse(summationEntity.getSummation());
+        return new STTResponse(summationEntity.getStt());
     }
 }
