@@ -1,5 +1,6 @@
 package com.example.notiapp
 
+import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
@@ -59,13 +60,23 @@ class RecordingsAdapter(
 
     private fun navigateToDetail(holder: RecordingViewHolder, recording: RecordingItem) {
         val context = holder.itemView.context
+
+        // SharedPreferences에서 서버 저장 파일명 확인
+        val sharedPreferences = context.getSharedPreferences("recording_files", Context.MODE_PRIVATE)
+        val serverSavedFileName = sharedPreferences.getString(recording.filename, "")
+
         val intent = Intent(context, RecordingDetailActivity::class.java).apply {
             putExtra("filePath", recording.filePath)
             putExtra("fileName", recording.filename)
             putExtra("recordingDate", recording.date)
             putExtra("duration", recording.duration)
+
+            // 서버 저장 파일명이 있으면 추가
+            if (!serverSavedFileName.isNullOrEmpty()) {
+                putExtra("serverSavedFileName", serverSavedFileName)
+            }
         }
-        Log.d(TAG, "상세 화면으로 이동: ${recording.filename}, ${recording.filePath}")
+        Log.d(TAG, "상세 화면으로 이동: ${recording.filename}, ${recording.filePath}, 서버 파일명: $serverSavedFileName")
         context.startActivity(intent)
     }
 
@@ -80,5 +91,4 @@ class RecordingsAdapter(
     fun releaseMediaPlayer() {
         // 아무 동작 없음
     }
-
 }

@@ -23,6 +23,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.FormBody
 import org.json.JSONObject
+import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
@@ -62,7 +63,7 @@ class RecordingDetailActivity : AppCompatActivity() {
             enableEdgeToEdge()
             setContentView(R.layout.activity_recording_detail)
 
-            // Edge-to-Edge 설정 유지 - 레이아웃 ID 확인 필요
+            // Edge-to-Edge 설정 유지
             ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.recordingDetail)) { v, insets ->
                 val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
                 v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -78,7 +79,7 @@ class RecordingDetailActivity : AppCompatActivity() {
             // 파일 정보 표시
             displayFileInfo()
 
-            // 파일 목록 가져오기
+            // 로컬 파일 정보 가져오기
             fetchSavedFileName()
 
             // 버튼 클릭 리스너 설정
@@ -109,7 +110,8 @@ class RecordingDetailActivity : AppCompatActivity() {
         intent?.let {
             filePath = it.getStringExtra("filePath") ?: ""
             fileName = it.getStringExtra("fileName") ?: ""
-            savedFileName = it.getStringExtra("savedFileName") ?: fileName // 서버에 저장된 실제 파일명, 없으면 원본 파일명 사용
+            // serverSavedFileName이 있으면 이를 우선 사용, 없으면 SharedPreferences에서 확인
+            savedFileName = it.getStringExtra("serverSavedFileName") ?: ""
             recordingDate = it.getStringExtra("recordingDate") ?: ""
             duration = it.getStringExtra("duration") ?: ""
 
@@ -123,76 +125,38 @@ class RecordingDetailActivity : AppCompatActivity() {
         Log.d(TAG, "파일 정보 표시 완료")
     }
 
-    // 서버에서 저장된 파일명 가져오기
+    // 로컬 파일 정보 가져오기로 수정
     private fun fetchSavedFileName() {
-        val token = getJwtToken()
-        if (token.isEmpty()) {
-            Toast.makeText(this, "로그인이 필요합니다", Toast.LENGTH_SHORT).show()
-            return
-        }
+        // 파일 경로에서 파일 객체 생성
+        val file = File(filePath)
 
-        thread {
-            try {
-                // 파일 목록 API 호출 - 원래는 서버에서 제공하는 API를 호출해야 함
-                val url = "http://10.0.2.2:8080/file/list"
-                val request = Request.Builder()
-                    .url(url)
-                    .header("Authorization", "Bearer $token")
-                    .get()
-                    .build()
+        if (file.exists()) {
+            // 원본 파일명
+            val originalFileName = file.name
 
-                client.newCall(request).execute().use { response ->
-                    val responseBody = response.body?.string()
-
-                    if (response.isSuccessful && responseBody != null) {
-                        try {
-                            // JSON 응답 파싱
-                            val jsonArray = JSONObject(responseBody).getJSONArray("files")
-
-                            // 파일 목록 처리
-                            for (i in 0 until jsonArray.length()) {
-                                val file = jsonArray.getJSONObject(i)
-                                val originalName = file.getString("originalName")
-                                val serverSavedName = file.getString("savedName")
-
-                                // 원본 파일명과 일치하는 파일 찾기
-                                if (originalName == fileName) {
-                                    savedFileName = serverSavedName
-                                    Log.d(TAG, "서버에서 받은 저장 파일명: $savedFileName")
-
-                                    // UI 업데이트는 메인 스레드에서
-                                    runOnUiThread {
-                                        Toast.makeText(this, "파일 정보를 가져왔습니다", Toast.LENGTH_SHORT).show()
-                                    }
-                                    return@use
-                                }
-                            }
-
-                            // 현재 서버 API가 구현되지 않았으므로, 여기서 직접 찾은 파일명을 사용
-                            // 실제 경로에 있는 파일 이름 사용 (예시 파일명)
-                            savedFileName = "2ee7d3fa-4472-4c1d-bfb6-f40217885e88_REC_20250517_081707.mp3"
-                            Log.d(TAG, "지정된 저장 파일명 사용: $savedFileName")
-
-                        } catch (e: Exception) {
-                            Log.e(TAG, "JSON 파싱 오류: ${e.message}", e)
-
-                            // API 실패 시 직접 알려준 파일명 사용
-                            savedFileName = "2ee7d3fa-4472-4c1d-bfb6-f40217885e88_REC_20250517_081707.mp3"
-                            Log.d(TAG, "서버 응답 처리 실패, 지정된 파일명 사용: $savedFileName")
-                        }
-                    } else {
-                        // API 호출 실패 시 직접 알려준 파일명 사용
-                        savedFileName = "2ee7d3fa-4472-4c1d-bfb6-f40217885e88_REC_20250517_081707.mp3"
-                        Log.d(TAG, "파일 목록 API 호출 실패, 지정된 파일명 사용: $savedFileName")
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "네트워크 오류: ${e.message}", e)
-
-                // 네트워크 오류 시 직접 알려준 파일명 사용
-                savedFileName = "2ee7d3fa-4472-4c1d-bfb6-f40217885e88_REC_20250517_081707.mp3"
-                Log.d(TAG, "네트워크 오류, 지정된 파일명 사용: $savedFileName")
+            // Intent에서 전달받은 서버 저장 파일명이 있으면 사용
+            if (savedFileName.isNotEmpty()) {
+                Log.d(TAG, "Intent에서 전달받은 서버 저장 파일명 사용: $savedFileName")
+                return
             }
+
+            // SharedPreferences에서 서버 저장 파일명 확인
+            val sharedPreferences = getSharedPreferences("recording_files", MODE_PRIVATE)
+            val serverSavedFileName = sharedPreferences.getString(originalFileName, "")
+
+            if (!serverSavedFileName.isNullOrEmpty()) {
+                // 서버에 저장된 파일명(UUID 포함)이 있으면 사용
+                savedFileName = serverSavedFileName
+                Log.d(TAG, "서버 저장 파일명 사용: $savedFileName")
+            } else {
+                // 캐시된 정보가 없으면 원본 파일명 사용
+                savedFileName = originalFileName
+                Log.d(TAG, "서버 저장 파일명을 찾을 수 없어 원본 파일명 사용: $savedFileName")
+            }
+        } else {
+            // 파일이 존재하지 않으면 Intent에서 받은 fileName 사용
+            savedFileName = fileName
+            Log.d(TAG, "파일을 찾을 수 없어 전달받은 파일명 사용: $savedFileName")
         }
     }
 
@@ -293,8 +257,9 @@ class RecordingDetailActivity : AppCompatActivity() {
         thread {
             try {
                 // POST 요청 본문 생성
+                // 여기서 파일명을 그대로 사용 - UUID 접두사까지 포함한 전체 파일명 전송
                 val requestBody = FormBody.Builder()
-                    .add("savedFileName", savedFileName) // 서버에 저장된 실제 파일명 사용
+                    .add("savedFileName", savedFileName) // 서버에 저장된 실제 파일명 사용 (UUID 접두사 포함)
                     .build()
 
                 // API 엔드포인트 URL
@@ -367,10 +332,107 @@ class RecordingDetailActivity : AppCompatActivity() {
     }
 
     private fun requestSummary(savedFileName: String) {
-        // 요약 API가 구현되지 않았으므로, 임시 메시지 표시
-        Toast.makeText(this, "요약본 생성 기능은 준비 중입니다.", Toast.LENGTH_SHORT).show()
+        // 저장된 파일명이 비어있는지 확인
+        if (savedFileName.isEmpty()) {
+            Toast.makeText(this, "파일명을 찾을 수 없습니다", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-        // 나중에 요약 API가 구현되면 requestSTT 함수와 유사하게 구현
+        // 로딩 다이얼로그 표시
+        val progressDialog = ProgressDialog(this).apply {
+            setMessage("요약본 생성 중...")
+            setCancelable(false)
+            show()
+        }
+
+        // JWT 토큰 가져오기 및 로깅
+        val token = getJwtToken()
+        Log.d(TAG, "사용 중인 JWT 토큰: ${if (token.isNotEmpty()) token.substring(0, minOf(10, token.length)) + "..." else "없음"}")
+
+        if (token.isEmpty()) {
+            progressDialog.dismiss()
+            Toast.makeText(this, "로그인이 필요합니다. 다시 로그인해주세요.", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, SignInActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+            startActivity(intent)
+            return
+        }
+
+        // 백그라운드 스레드에서 네트워크 요청 수행
+        thread {
+            try {
+                // POST 요청 본문 생성 - UUID 접두사까지 포함한 전체 파일명
+                val requestBody = FormBody.Builder()
+                    .add("savedFileName", savedFileName) // 서버에 저장된 실제 파일명 사용
+                    .build()
+
+                // API 엔드포인트 URL (localhost 대신 10.0.2.2 사용)
+                val url = "http://10.0.2.2:8080/ai/gemini"
+                Log.d(TAG, "요약 요청 URL: $url")
+                Log.d(TAG, "요청 파라미터: savedFileName=$savedFileName") // 파라미터 로깅 추가
+
+                // POST 요청 생성
+                val request = Request.Builder()
+                    .url(url)
+                    .post(requestBody)  // POST 메서드 사용
+                    .header("Authorization", "Bearer $token")
+                    .build()
+
+                Log.d(TAG, "요청 메서드: ${request.method}")
+                Log.d(TAG, "요청 헤더: ${request.headers}")
+
+                // 요청 실행
+                client.newCall(request).execute().use { response ->
+                    val responseBody = response.body?.string()
+                    Log.d(TAG, "요약 응답 코드: ${response.code}")
+                    Log.d(TAG, "요약 응답 본문: $responseBody")
+
+                    runOnUiThread {
+                        progressDialog.dismiss()
+
+                        if (response.isSuccessful && responseBody != null) {
+                            try {
+                                // JSON 응답 파싱
+                                val jsonResponse = JSONObject(responseBody)
+                                val summaryText = jsonResponse.getString("summation")
+
+                                // 결과 다이얼로그 표시
+                                showSummaryResultDialog(summaryText)
+
+                            } catch (e: Exception) {
+                                Log.e(TAG, "JSON 파싱 오류: ${e.message}", e)
+                                Toast.makeText(
+                                    this,
+                                    "응답 처리 중 오류가 발생했습니다: ${e.message}",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        } else {
+                            // 오류 처리
+                            val errorMessage = when (response.code) {
+                                401 -> "인증이 만료되었습니다. 다시 로그인해주세요."
+                                403 -> "접근 권한이 없습니다. 관리자에게 문의하세요."
+                                404 -> "요약본을 찾을 수 없습니다."
+                                405 -> "요청 방식이 잘못되었습니다. GET 대신 POST를 사용해야 합니다."
+                                500 -> "서버 오류가 발생했습니다. 잠시 후 다시 시도하세요."
+                                else -> "요약본 생성 실패: ${response.code}"
+                            }
+                            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "네트워크 오류: ${e.message}", e)
+                runOnUiThread {
+                    progressDialog.dismiss()
+                    Toast.makeText(
+                        this,
+                        "서버 연결에 실패했습니다: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
     }
 
     private fun showSTTResultDialog(sttText: String) {
@@ -390,6 +452,35 @@ class RecordingDetailActivity : AppCompatActivity() {
         // 복사 버튼 리스너 설정
         dialogView.findViewById<Button>(R.id.copyButton).setOnClickListener {
             copyTextToClipboard(sttText)
+            Toast.makeText(this, "클립보드에 복사되었습니다", Toast.LENGTH_SHORT).show()
+        }
+
+        // 다이얼로그 표시
+        dialog.show()
+    }
+
+    // 요약 결과를 보여주는 다이얼로그
+    private fun showSummaryResultDialog(summaryText: String) {
+        // 다이얼로그용 뷰 인플레이션
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_stt_result, null)
+
+        // 다이얼로그 제목 변경
+        val dialogTitle = dialogView.findViewById<TextView>(R.id.dialogTitle)
+        dialogTitle.text = "요약 결과"
+
+        // 결과 텍스트 설정
+        val resultTextView = dialogView.findViewById<TextView>(R.id.sttResultText)
+        resultTextView.text = summaryText
+
+        // 다이얼로그 생성
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        // 복사 버튼 리스너 설정
+        dialogView.findViewById<Button>(R.id.copyButton).setOnClickListener {
+            copyTextToClipboard(summaryText)
             Toast.makeText(this, "클립보드에 복사되었습니다", Toast.LENGTH_SHORT).show()
         }
 
