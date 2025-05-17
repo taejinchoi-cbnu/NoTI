@@ -1,5 +1,6 @@
 package com.expert.project.noty.service.file;
 
+import com.expert.project.noty.dto.file.AudioGetFileInformationResponse;
 import com.expert.project.noty.dto.file.AudioUploadRequest;
 import com.expert.project.noty.entity.AudioFileEntity;
 import com.expert.project.noty.repository.AudioFileRepository;
@@ -15,10 +16,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
-public class AudioFileService {
+public class    AudioFileService {
 
     @Value("${file.upload.dir}")
     private String baseDir;
@@ -75,5 +78,19 @@ public class AudioFileService {
         audioFileRepository.save(audioFileEntity);
 
         return savedName;
+    }
+
+    public List<AudioGetFileInformationResponse> getAudioFilesByUserId(String userId) {
+        return audioFileRepository.findByUserId(userId).stream()
+                .map(file -> AudioGetFileInformationResponse.builder()
+                        .originalName(file.getOriginalName())
+                        .savedName(file.getSavedName())
+                        .filePath(file.getFilePath())
+                        .fileSize(file.getFileSize())
+                        .fileType(file.getFileType())
+                        .uploadDate(file.getUploadDate())
+                        .duration(file.getDuration())
+                        .build()
+                ).collect(Collectors.toList());
     }
 }
