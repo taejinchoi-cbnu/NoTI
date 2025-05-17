@@ -23,6 +23,9 @@
         android:theme="@style/Theme.NotiApp"
         tools:targetApi="31">
         <activity
+            android:name=".RecordingDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".UserInfoActivity"
             android:exported="false" />
         <activity

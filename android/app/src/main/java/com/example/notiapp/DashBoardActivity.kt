@@ -79,7 +79,7 @@ class DashBoardActivity : AppCompatActivity() {
                 }
                 else -> false
             }
-        } // <- 여기에 닫는 중괄호 추가
+        }
     }
 
     private fun setupRecyclerView() {
@@ -146,7 +146,5 @@ class DashBoardActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // 메모리 누수 방지
-        recordingsAdapter.releaseMediaPlayer()
     }
 }

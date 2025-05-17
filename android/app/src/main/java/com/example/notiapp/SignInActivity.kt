@@ -92,7 +92,7 @@ class SignInActivity : AppCompatActivity() {
             return
         }
 
-        // 테스트 계정 확인 - 서버 검증 우회
+        // 테스트 계정 확인 - 서버 검증 우회 - 개발단계 끝나면 삭제하기
         if (userId == "test" && password == "1234") {
             Log.d(TAG, "테스트 계정 로그인 - 서버 검증 우회")
             Toast.makeText(this, "테스트 계정으로 로그인 성공!", Toast.LENGTH_SHORT).show()
@@ -191,7 +191,7 @@ class SignInActivity : AppCompatActivity() {
                                     // 응답 본문이 비어있음
                                     Log.w(TAG, "서버 응답이 비어있습니다")
                                     // 토큰이 헤더에 있을 수 있으므로 헤더 확인
-                                    val authHeader = response.header("Authorization")
+                                    val authHeader = request.header("Authorization") ?: "없음"
                                     if (!authHeader.isNullOrEmpty() && authHeader.startsWith("Bearer ")) {
                                         val token = authHeader.substring(7) // "Bearer " 제거
 
@@ -201,7 +201,8 @@ class SignInActivity : AppCompatActivity() {
                                             .putString("jwt_token", token)
                                             .apply()
 
-                                        Log.d(TAG, "JWT 토큰 저장 완료 (Authorization 헤더)")
+                                        Log.d(TAG, "JWT 토큰 저장 완료 (Authorization 헤더에서)")
+                                        Log.d(TAG, "Authorization 헤더: $authHeader")
                                     }
                                 }
 
