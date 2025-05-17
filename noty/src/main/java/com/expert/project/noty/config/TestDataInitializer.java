@@ -26,6 +26,17 @@ public class TestDataInitializer {
                 userRepository.save(userEntity);
             }
 
+            String userId2 = "taejin";
+            if (userRepository.findByUserId(userId2).isEmpty()) {
+                UserEntity userEntity = new UserEntity();
+                userEntity.setUserId(userId2);
+                userEntity.setPassword(passwordEncoder.encode("1234"));
+                userEntity.setNickname("taejin");
+                userEntity.setEmail("test" + "@example.com");
+                userEntity.setRole("ROLE_ADMIN");
+                userRepository.save(userEntity);
+            }
+
             // 100개의 테스트 데이터 입력
             for (int i = 1; i <= 100; i++) {
                 String userId = "testuser" + i;
