@@ -24,9 +24,8 @@ public class STTController {
             @RequestParam("savedFileName") String savedFileName,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        System.out.println("hellow");
-        System.out.println("savedFileName: " + savedFileName);
-        System.out.println("userDetails: " + (userDetails != null ? "not null" : "null"));
+        System.out.println("protocol: /ai/stt");
+
         if (userDetails != null) {
             System.out.println("userId: " + userDetails.getUsername());
             System.out.println("userRole: " + userDetails.getAuthorities());
@@ -34,10 +33,10 @@ public class STTController {
 
         try {
             String userId = userDetails.getUsername();
-            System.out.println("Calling service with userId: " + userId);
 
             STTResponse response = sttService.getSummationBySavedFileName(savedFileName, userId);
-            System.out.println("Service returned successfully: " + (response != null));
+
+            System.out.println("/ai/stt is successful");
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {

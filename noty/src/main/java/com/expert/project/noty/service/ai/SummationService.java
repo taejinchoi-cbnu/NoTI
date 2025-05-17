@@ -42,8 +42,12 @@ public class SummationService {
                         savedFileName, userId, audioFileEntity.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Summation not found"));
 
-        // 전체 프롬프트 생성
-        String fullPrompt = promptProperties.getDefaultPrompt() + "오늘 회의는 신규 프로젝트 킥오프를 위한 방향성과 초기 업무 분담을 논의하기 위한 자리로 시작됐다. 우선 프로젝트의 목적과 배경에 대한 간단한 설명이 이루어졌다. 이번 프로젝트는 기존 고객사의 요청에 의해 개편되는 모바일 앱 개발 프로젝트이며, 사용성 개선과 성능 최적화가 핵심 목표다.\n" +
+        if (summationEntity.getStt() == null) {
+            System.out.println("stt is null");
+            return new SummationResponse("null");
+        }
+
+        String example = "오늘 회의는 신규 프로젝트 킥오프를 위한 방향성과 초기 업무 분담을 논의하기 위한 자리로 시작됐다. 우선 프로젝트의 목적과 배경에 대한 간단한 설명이 이루어졌다. 이번 프로젝트는 기존 고객사의 요청에 의해 개편되는 모바일 앱 개발 프로젝트이며, 사용성 개선과 성능 최적화가 핵심 목표다.\n" +
                 "\n" +
                 "먼저 일정에 대한 개괄적인 계획이 제시되었다. 전체 프로젝트는 약 3개월로 예상되며, 1개월은 기획과 설계, 1개월은 개발, 마지막 1개월은 테스트 및 배포 단계로 구성될 예정이다. 다만 고객사 쪽에서 기획안을 빠르게 보고 싶어 하기 때문에, 내부적으로 2주 내에 초기 와이어프레임을 완성하는 것이 중요하다는 언급이 있었다.\n" +
                 "\n" +
@@ -59,6 +63,11 @@ public class SummationService {
                 "\n" +
                 "마지막으로 전체 일정과 다음 회의 일정이 확인되었다. 이번 주 금요일까지 초기 요구사항 정리를 완료하고, 다음 주 월요일에는 와이어프레임 1차 초안을 공유하는 것을 목표로 한다. 회의 시간은 월요일 오전 10시로 잠정 확정되었고, 필요시 슬랙으로 사전 논의를 진행하기로 했다.\n" +
                 "\n";
+
+        // 전체 프롬프트 생성
+        String fullPrompt = promptProperties.getDefaultPrompt() + summationEntity.getStt();
+
+        System.out.println("prompt: " + fullPrompt);
 
         return new SummationResponse(geminiService.callGemini(fullPrompt));
     }

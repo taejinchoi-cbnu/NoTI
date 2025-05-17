@@ -28,6 +28,7 @@ public class SummationController {
 
         String userId = userDetails.getUsername();
 
+        System.out.println("protocol: /ai/gemini");
         SummationResponse response = summationService.processGeminiRequest(userId, savedFileName);
         return ResponseEntity.ok(response);
     }
