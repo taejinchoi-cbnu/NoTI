@@ -12,7 +12,7 @@
         android:id="@+id/signInLogo"
         android:layout_width="0dp"
         android:layout_height="186dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -23,37 +23,24 @@
         android:id="@+id/signInUserId"
         android:layout_width="0dp"
         android:layout_height="48dp"
-        android:layout_marginTop="32dp"
-        android:hint="아이디"
-        android:textSize="20sp"
-        android:fontFamily="@font/pretendardregular"
+        android:layout_marginTop="40dp"
         android:backgroundTint="@color/mainColor"
+        android:fontFamily="@font/pretendardregular"
+        android:hint="아이디"
         android:inputType="text"
+        android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/signInLogo"
-        app:layout_constraintWidth_percent="0.8" />
-
-    <TextView
-        android:id="@+id/orText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="@string/or_text"
-        android:fontFamily="@font/pretendardregular"
-        android:textAlignment="center"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/signInBtn"
         app:layout_constraintWidth_percent="0.8" />
 
     <EditText
         android:id="@+id/signInPassword"
         android:layout_width="0dp"
         android:layout_height="48dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="12dp"
         android:hint="@string/password_hint"
-        android:textSize="20sp"
+        android:textSize="16sp"
         android:fontFamily="@font/pretendardregular"
         android:backgroundTint="@color/mainColor"
         android:inputType="textPassword"
@@ -64,16 +51,27 @@
 
     <Button
         android:id="@+id/signInBtn"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        style="@style/ButtonPrimary"
+        android:layout_width="220dp"
+        android:layout_height="48dp"
         android:layout_marginTop="32dp"
-        android:background="@color/mainColor"
         android:text="@string/login_button_text"
-        android:fontFamily="@font/pretendardregular"
-        android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/signInPassword"
+        app:layout_constraintWidth_percent="0.8" />
+
+    <TextView
+        android:id="@+id/orText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/pretendardregular"
+        android:text="@string/or_text"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/signInBtn"
         app:layout_constraintWidth_percent="0.8" />
 
     <LinearLayout
@@ -92,18 +90,17 @@
             android:id="@+id/signUpText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/pretendardregular"
             android:text="@string/sign_in_text"
-            android:fontFamily="@font/pretendardregular"/>
+            android:textSize="14sp" />
 
         <Button
             android:id="@+id/signUpBtn"
+            style="@style/ButtonSecondary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@color/mainColor"
-            android:textColor="@android:color/white"
-            android:text="가입하기"
-            android:fontFamily="@font/pretendardregular"/>
+            android:layout_marginStart="8dp"
+            android:text="가입하기" />
 
     </LinearLayout>
 
@@ -123,18 +120,17 @@
             android:id="@+id/findPasswordText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/pretendardregular"
             android:text="@string/find_password_text"
-            android:fontFamily="@font/pretendardregular"/>
+            android:textSize="14sp" />
 
         <Button
             android:id="@+id/findPasswordBtn"
+            style="@style/ButtonSecondary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:background="@color/mainColor"
-            android:textColor="@android:color/white"
-            android:text="@string/find_password_button_text"
-            android:fontFamily="@font/pretendardregular"/>
+            android:text="@string/find_password_button_text" />
 
     </LinearLayout>
 
