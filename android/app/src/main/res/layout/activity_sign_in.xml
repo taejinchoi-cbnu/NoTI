@@ -5,7 +5,7 @@
     android:id="@+id/SignInmain"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bgColor"
+    android:background="@color/white"
     tools:context=".SignInActivity">
 
     <ImageView
@@ -17,14 +17,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintWidth_percent="0.8"
-        app:srcCompat="@drawable/logowhite" />
+        app:srcCompat="@drawable/newlogo" />
 
     <EditText
         android:id="@+id/signInUserId"
         android:layout_width="0dp"
         android:layout_height="48dp"
         android:layout_marginTop="32dp"
-        android:hint="아이디를 입력하세요"
+        android:hint="아이디"
+        android:textSize="20sp"
+        android:fontFamily="@font/pretendardregular"
+        android:backgroundTint="@color/mainColor"
         android:inputType="text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -37,6 +40,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="@string/or_text"
+        android:fontFamily="@font/pretendardregular"
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -49,6 +53,9 @@
         android:layout_height="48dp"
         android:layout_marginTop="16dp"
         android:hint="@string/password_hint"
+        android:textSize="20sp"
+        android:fontFamily="@font/pretendardregular"
+        android:backgroundTint="@color/mainColor"
         android:inputType="textPassword"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -60,8 +67,10 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:background="@color/btnColor"
+        android:background="@color/mainColor"
         android:text="@string/login_button_text"
+        android:fontFamily="@font/pretendardregular"
+        android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/signInPassword"
@@ -83,14 +92,18 @@
             android:id="@+id/signUpText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/sign_in_text" />
+            android:text="@string/sign_in_text"
+            android:fontFamily="@font/pretendardregular"/>
 
         <Button
             android:id="@+id/signUpBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="가입하기" />
+            android:background="@color/mainColor"
+            android:textColor="@android:color/white"
+            android:text="가입하기"
+            android:fontFamily="@font/pretendardregular"/>
 
     </LinearLayout>
 
@@ -110,15 +123,18 @@
             android:id="@+id/findPasswordText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/find_password_text" />
+            android:text="@string/find_password_text"
+            android:fontFamily="@font/pretendardregular"/>
 
         <Button
             android:id="@+id/findPasswordBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:background="@color/btnColor"
-            android:text="@string/find_password_button_text" />
+            android:background="@color/mainColor"
+            android:textColor="@android:color/white"
+            android:text="@string/find_password_button_text"
+            android:fontFamily="@font/pretendardregular"/>
 
     </LinearLayout>
 

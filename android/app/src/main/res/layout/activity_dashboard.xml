@@ -5,14 +5,17 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bgColor"
+    android:background="@color/white"
     tools:context=".DashBoardActivity">
 
     <Button
         android:id="@+id/goToRec"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="녹음하러가기"
+        android:text="녹음하러 가기"
+        android:background="@color/mainColor"
+        android:textColor="@android:color/white"
+        android:fontFamily="@font/pretendardregular"
         app:layout_constraintBottom_toTopOf="@+id/guideline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -32,8 +35,8 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:text="녹음 파일 목록"
-        android:textSize="18sp"
-        android:textStyle="bold"
+        android:fontFamily="@font/pretendardbold"
+        android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline" />
 

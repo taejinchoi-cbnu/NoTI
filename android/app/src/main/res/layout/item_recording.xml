@@ -23,8 +23,9 @@
             android:layout_marginEnd="8dp"
             android:ellipsize="middle"
             android:singleLine="true"
-            android:text="녹음파일명.mp3"
-            android:textSize="16sp"
+            android:text="녹음 파일명.mp3"
+            android:fontFamily="@font/pretendardregular"
+            android:textSize="20sp"
             app:layout_constraintEnd_toStartOf="@+id/recordingPlayButton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -36,7 +37,8 @@
             android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
             android:text="2025-05-01 | 00:30"
-            android:textSize="12sp"
+            android:fontFamily="@font/pretendardregular"
+            android:textSize="15sp"
             app:layout_constraintEnd_toStartOf="@+id/recordingPlayButton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/recordingFileName" />

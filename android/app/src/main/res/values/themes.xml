@@ -6,7 +6,7 @@
     </style>
 
     <style name="Theme.NotiApp" parent="Base.Theme.NotiApp">
-        <item name="android:windowSplashScreenBackground" tools:targetApi="31">@color/bgColor</item>
-        <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="31">@drawable/logo_white_sm</item>
+        <item name="android:windowSplashScreenBackground" tools:targetApi="31">@color/white</item>
+        <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="31">@drawable/newlogo</item>
     </style>
 </resources>
