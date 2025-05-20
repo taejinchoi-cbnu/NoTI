@@ -20,6 +20,17 @@ class UserInfoActivity : AppCompatActivity() {
             insets
         }
 
+        // 네비게이션 바의 하단 패딩을 제한
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+        ViewCompat.setOnApplyWindowInsetsListener(bottomNav) { view, insets ->
+            val systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            // 하단 패딩을 5dp로 제한
+            val maxBottomPadding = resources.getDimensionPixelSize(R.dimen.max_bottom_padding) // 5dp
+            val bottomPadding = minOf(systemInsets.bottom, maxBottomPadding)
+            view.setPadding(0, 0, 0, bottomPadding)
+            insets
+        }
+
         // 하단 네비게이션 설정
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         bottomNavigation.selectedItemId = R.id.navigation_user // 현재 화면은 내정보 탭으로 설정

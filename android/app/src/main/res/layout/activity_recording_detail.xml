@@ -107,7 +107,6 @@
             android:textSize="18sp" />
     </androidx.cardview.widget.CardView>
 
-    <!-- 하단 네비게이션 바 -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
         android:layout_width="0dp"
@@ -115,6 +114,7 @@
         android:background="?android:attr/windowBackground"
         app:itemTextColor="@color/black"
         app:itemIconTint="@color/black"
+        app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
