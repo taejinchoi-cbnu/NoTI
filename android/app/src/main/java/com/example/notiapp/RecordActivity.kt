@@ -1,6 +1,7 @@
 package com.example.notiapp
 
 import android.Manifest
+import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -10,6 +11,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -41,6 +43,7 @@ class RecordActivity : AppCompatActivity() {
     private var outputFile: String = ""
     private var recordingDuration: Int = 0
     private var startTime: Long = 0
+    private var tempFileName: String = "" // 임시 파일명
 
     private lateinit var recordButton: Button
 
@@ -94,9 +97,10 @@ class RecordActivity : AppCompatActivity() {
                 recordingsDir.mkdirs()
             }
 
-            // 파일명 생성 (현재 시간 기반)
+            // 임시 파일명 생성 (녹음 중에는 임시 파일명 사용)
             val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-            outputFile = File(recordingsDir, "REC_$timestamp.mp3").absolutePath
+            tempFileName = "TEMP_REC_$timestamp.mp3"
+            outputFile = File(recordingsDir, tempFileName).absolutePath
 
             // 녹음 시작 시간 기록
             startTime = System.currentTimeMillis()
@@ -139,8 +143,8 @@ class RecordActivity : AppCompatActivity() {
             recordButton.text = "녹음"
             findViewById<TextView>(R.id.textView4).text = "녹음이 완료되었습니다"
 
-            // 녹음 파일 서버 전송 및 로딩 창 표시
-            uploadRecordingAndNavigate()
+            // 파일명 입력 다이얼로그 표시
+            showFileNameInputDialog()
 
         } catch (e: Exception) {
             e.printStackTrace()
@@ -148,11 +152,89 @@ class RecordActivity : AppCompatActivity() {
         }
     }
 
+    private fun showFileNameInputDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_filename_input, null)
+        val fileNameEditText = dialogView.findViewById<EditText>(R.id.fileNameEditText)
+
+        // 기본 파일명 제안 (현재 날짜/시간 기반)
+        val defaultName = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date())
+        fileNameEditText.setText("녹음 $defaultName")
+        fileNameEditText.selectAll() // 전체 선택하여 쉽게 수정 가능
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("파일명 입력")
+            .setMessage("녹음 파일의 이름을 입력해주세요.")
+            .setView(dialogView)
+            .setPositiveButton("저장") { _, _ ->
+                val userFileName = fileNameEditText.text.toString().trim()
+                if (userFileName.isNotEmpty()) {
+                    processRecordingWithCustomName(userFileName)
+                } else {
+                    Toast.makeText(this, "파일명을 입력해주세요.", Toast.LENGTH_SHORT).show()
+                    showFileNameInputDialog() // 다시 다이얼로그 표시
+                }
+            }
+            .setNegativeButton("취소") { _, _ ->
+                // 취소 시 임시 파일 삭제
+                deleteTempFile()
+                navigateToDashboard()
+            }
+            .setCancelable(false) // 뒤로가기로 취소 방지
+            .create()
+
+        dialog.show()
+    }
+
+    private fun processRecordingWithCustomName(userFileName: String) {
+        // 파일명에 확장자가 없으면 추가
+        val finalFileName = if (userFileName.endsWith(".mp3", true)) {
+            userFileName
+        } else {
+            "$userFileName.mp3"
+        }
+
+        // 임시 파일을 사용자 지정 파일명으로 변경
+        val tempFile = File(outputFile)
+        val newFile = File(tempFile.parent, finalFileName)
+
+        try {
+            if (tempFile.renameTo(newFile)) {
+                outputFile = newFile.absolutePath
+                Log.d(TAG, "파일명 변경 성공: ${tempFile.name} -> ${newFile.name}")
+
+                // 서버 업로드 진행
+                uploadRecordingAndNavigate()
+            } else {
+                Log.e(TAG, "파일명 변경 실패")
+                Toast.makeText(this, "파일명 변경에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                // 임시 파일명으로 업로드 진행
+                uploadRecordingAndNavigate()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "파일명 변경 중 오류: ${e.message}", e)
+            Toast.makeText(this, "파일 처리 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+            uploadRecordingAndNavigate()
+        }
+    }
+
+    private fun deleteTempFile() {
+        try {
+            val tempFile = File(outputFile)
+            if (tempFile.exists()) {
+                tempFile.delete()
+                Log.d(TAG, "임시 파일 삭제: $tempFileName")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "임시 파일 삭제 실패: ${e.message}", e)
+        }
+    }
+
     private fun uploadRecordingAndNavigate() {
-        val progressDialog = ProgressDialog(this)
-        progressDialog.setMessage("녹음 파일 처리 중...")
-        progressDialog.setCancelable(false)
-        progressDialog.show()
+        val progressDialog = ProgressDialog(this).apply {
+            setMessage("녹음 파일 업로드 중...")
+            setCancelable(false)
+            show()
+        }
 
         // 서버에 녹음 파일 전송
         thread {
@@ -186,7 +268,7 @@ class RecordActivity : AppCompatActivity() {
                     .setType(MultipartBody.FORM)
                     .addFormDataPart(
                         "file",
-                        file.name,
+                        file.name, // 사용자가 지정한 파일명 사용
                         file.asRequestBody("audio/mpeg".toMediaTypeOrNull())
                     )
                     .addFormDataPart("duration", recordingDuration.toString())
@@ -224,7 +306,7 @@ class RecordActivity : AppCompatActivity() {
 
                                     Log.d(TAG, "파일명 매핑 저장: ${file.name} -> $serverSavedFileName")
 
-                                    Toast.makeText(this, "녹음 파일이 서버에 업로드되었습니다!", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(this, "녹음 파일이 성공적으로 저장되었습니다!\n파일명: ${file.name}", Toast.LENGTH_LONG).show()
                                 } else {
                                     Log.w(TAG, "예상치 못한 응답 형식: $responseBody")
                                     Toast.makeText(this, "녹음 파일이 업로드되었지만 파일명을 확인할 수 없습니다.", Toast.LENGTH_SHORT).show()

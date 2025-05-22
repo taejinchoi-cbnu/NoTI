@@ -8,49 +8,121 @@
     android:background="@color/white"
     tools:context=".DashBoardActivity">
 
-    <Button
-        android:id="@+id/goToRec"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="녹음하러 가기"
-        android:background="@color/mainColor"
-        android:textColor="@android:color/white"
-        android:fontFamily="@font/pretendardregular"
-        app:layout_constraintBottom_toTopOf="@+id/guideline"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.2" />
-
+    <!-- 파일 목록 제목 -->
     <TextView
         android:id="@+id/recordingsTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:text="녹음 파일 목록"
         android:fontFamily="@font/pretendardbold"
+        android:text="녹음 파일 목록"
+        android:textColor="@color/black"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recordingsRecyclerView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+    <!-- 파일 개수 표시 -->
+    <TextView
+        android:id="@+id/fileCountText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:alpha="0.7"
+        android:fontFamily="@font/pretendardregular"
+        android:text="총 0개 파일"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@id/recordingsTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/recordingsTitle" />
+
+    <!-- 구분선 -->
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginHorizontal="16dp"
         android:layout_marginTop="8dp"
-        android:paddingBottom="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:alpha="0.1"
+        android:background="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/recordingsTitle" />
+        app:layout_constraintTop_toBottomOf="@id/recordingsTitle" />
 
+    <!-- 스크롤 가능한 파일 목록 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recordingsRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:clipToPadding="false"
+        android:fadeScrollbars="false"
+        android:paddingBottom="80dp"
+        android:scrollbars="vertical"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/divider"
+        tools:listitem="@layout/item_recording" />
+
+    <!-- 파일이 없을 때 표시할 메시지 -->
+    <LinearLayout
+        android:id="@+id/emptyStateLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/goToRec"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/divider">
+
+        <ImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginBottom="16dp"
+            android:alpha="0.3"
+            android:src="@android:drawable/ic_menu_agenda" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:alpha="0.5"
+            android:fontFamily="@font/pretendardregular"
+            android:text="저장된 녹음 파일이 없습니다"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0.4"
+            android:fontFamily="@font/pretendardregular"
+            android:gravity="center"
+            android:lineSpacingExtra="4dp"
+            android:text="아래의 '녹음하러 가기' 버튼을 눌러\n새로운 녹음을 시작해보세요!"
+            android:textColor="@color/black"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+    <!-- 녹음하러 가기 버튼 -->
+    <Button
+        android:id="@+id/goToRec"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:background="@drawable/ic_recording"
+        android:layout_marginBottom="20dp"
+        android:padding="20dp"
+        android:elevation="4dp"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- 하단 네비게이션 -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
         android:layout_width="0dp"

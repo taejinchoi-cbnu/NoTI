@@ -27,4 +27,19 @@
         <item name="android:elevation">0dp</item>
         <item name="android:stateListAnimator">@null</item>
     </style>
+
+    <!-- 하단 navbar 스타일 -->
+    <style name="CustomBottomNavigationView" parent="Widget.Design.BottomNavigationView">
+        <item name="android:textSize">10sp</item>
+    </style>
+
+    <style name="BottomNavigationActiveText" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">10sp</item>
+        <item name="android:fontFamily">@font/pretendardregular</item>
+    </style>
+
+    <style name="BottomNavigationInactiveText" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">9sp</item>
+        <item name="android:fontFamily">@font/pretendardregular</item>
+    </style>
 </resources>

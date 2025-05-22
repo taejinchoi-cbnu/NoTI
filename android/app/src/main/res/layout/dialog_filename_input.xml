@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="파일명을 입력하세요"
+        android:textSize="16sp"
+        android:fontFamily="@font/pretendardregular"
+        android:textColor="@color/black"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/fileNameEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="예: 회의록_2025-01-15"
+        android:inputType="text"
+        android:maxLines="1"
+        android:fontFamily="@font/pretendardregular"
+        android:textSize="16sp"
+        android:backgroundTint="@color/mainColor"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="※ .mp3 확장자는 자동으로 추가됩니다."
+        android:textSize="12sp"
+        android:fontFamily="@font/pretendardregular"
+        android:textColor="@color/black"
+        android:alpha="0.6" />
+
+</LinearLayout>

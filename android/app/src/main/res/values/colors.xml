@@ -2,6 +2,7 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="red">#FFD32F2F</color>
     <color name="bgColor">#A8D7F9</color>
     <color name="btnColor">#EFF0F2</color>
     <color name="mainColor">#02590F</color>

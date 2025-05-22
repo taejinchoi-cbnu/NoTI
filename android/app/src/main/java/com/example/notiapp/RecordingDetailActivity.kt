@@ -37,6 +37,7 @@ class RecordingDetailActivity : AppCompatActivity() {
     private lateinit var scriptButton: CardView
     private lateinit var summaryButton: CardView
     private lateinit var playButton: CardView
+    private lateinit var downloadButton: CardView
     private lateinit var bottomNavigationView: BottomNavigationView
 
     // 파일 정보 변수
@@ -45,6 +46,10 @@ class RecordingDetailActivity : AppCompatActivity() {
     private var savedFileName: String = "" // 서버에 저장된 실제 파일명
     private var recordingDate: String = ""
     private var duration: String = ""
+    private var isServerFile: Boolean = false // 서버 파일 여부
+    private var isDownloaded: Boolean = false // 다운로드 여부
+    private var fileSize: Long = 0L // 파일 크기
+    private var uploadDate: String = "" // 업로드 날짜
 
     // 미디어 플레이어
     private var mediaPlayer: MediaPlayer? = null
@@ -99,7 +104,7 @@ class RecordingDetailActivity : AppCompatActivity() {
             // 하단 네비게이션 설정
             setupBottomNavigation()
 
-            Log.d(TAG, "onCreate 완료: fileName=$fileName, filePath=$filePath, savedFileName=$savedFileName")
+            Log.d(TAG, "onCreate 완료: fileName=$fileName, filePath=$filePath, savedFileName=$savedFileName, isServerFile=$isServerFile, isDownloaded=$isDownloaded")
         } catch (e: Exception) {
             Log.e(TAG, "onCreate 에러: ${e.message}", e)
             // 오류 대화상자 표시 또는 안전한 오류 처리
@@ -113,6 +118,7 @@ class RecordingDetailActivity : AppCompatActivity() {
         scriptButton = findViewById(R.id.scriptButton)
         summaryButton = findViewById(R.id.summaryButton)
         playButton = findViewById(R.id.playButton)
+        downloadButton = findViewById(R.id.downloadButton)
         bottomNavigationView = findViewById(R.id.bottomNavigationView)
     }
 
@@ -121,53 +127,70 @@ class RecordingDetailActivity : AppCompatActivity() {
         intent?.let {
             filePath = it.getStringExtra("filePath") ?: ""
             fileName = it.getStringExtra("fileName") ?: ""
-            // serverSavedFileName이 있으면 이를 우선 사용, 없으면 SharedPreferences에서 확인
             savedFileName = it.getStringExtra("serverSavedFileName") ?: ""
             recordingDate = it.getStringExtra("recordingDate") ?: ""
             duration = it.getStringExtra("duration") ?: ""
+            isServerFile = it.getBooleanExtra("isServerFile", false)
+            isDownloaded = it.getBooleanExtra("isDownloaded", false)
+            fileSize = it.getLongExtra("fileSize", 0L)
+            uploadDate = it.getStringExtra("uploadDate") ?: ""
 
-            Log.d(TAG, "파일 정보 추출: fileName=$fileName, filePath=$filePath, savedFileName=$savedFileName")
+            Log.d(TAG, "파일 정보 추출: fileName=$fileName, filePath=$filePath, savedFileName=$savedFileName, isServerFile=$isServerFile, isDownloaded=$isDownloaded")
         }
     }
 
     private fun displayFileInfo() {
-        // 파일명 표시
-        fileNameText.text = fileName
+        // 파일명과 추가 정보 표시
+        if (isServerFile) {
+            val fileSizeKB = fileSize / 1024
+            val downloadStatus = if (isDownloaded) "다운로드됨" else "미다운로드"
+            fileNameText.text = "$fileName\n(서버 파일 - ${fileSizeKB}KB - $downloadStatus)"
+        } else {
+            fileNameText.text = fileName
+        }
         Log.d(TAG, "파일 정보 표시 완료")
     }
 
     // 로컬 파일 정보 가져오기로 수정
+// fetchSavedFileName() 메서드만 수정
     private fun fetchSavedFileName() {
-        // 파일 경로에서 파일 객체 생성
-        val file = File(filePath)
+        // 서버 파일인 경우 Intent에서 전달받은 savedFileName을 그대로 사용
+        if (isServerFile && savedFileName.isNotEmpty()) {
+            Log.d(TAG, "서버 파일: Intent에서 전달받은 서버 저장 파일명 사용: $savedFileName")
+            return
+        }
 
-        if (file.exists()) {
-            // 원본 파일명
-            val originalFileName = file.name
+        // 로컬 파일인 경우에만 기존 로직 수행
+        if (!isServerFile) {
+            // 파일 경로에서 파일 객체 생성
+            val file = File(filePath)
 
-            // Intent에서 전달받은 서버 저장 파일명이 있으면 사용
-            if (savedFileName.isNotEmpty()) {
-                Log.d(TAG, "Intent에서 전달받은 서버 저장 파일명 사용: $savedFileName")
-                return
-            }
+            if (file.exists()) {
+                // 원본 파일명
+                val originalFileName = file.name
 
-            // SharedPreferences에서 서버 저장 파일명 확인
-            val sharedPreferences = getSharedPreferences("recording_files", MODE_PRIVATE)
-            val serverSavedFileName = sharedPreferences.getString(originalFileName, "")
+                // SharedPreferences에서 서버 저장 파일명 확인
+                val sharedPreferences = getSharedPreferences("recording_files", MODE_PRIVATE)
+                val serverSavedFileName = sharedPreferences.getString(originalFileName, "")
 
-            if (!serverSavedFileName.isNullOrEmpty()) {
-                // 서버에 저장된 파일명(UUID 포함)이 있으면 사용
-                savedFileName = serverSavedFileName
-                Log.d(TAG, "서버 저장 파일명 사용: $savedFileName")
+                if (!serverSavedFileName.isNullOrEmpty()) {
+                    // 서버에 저장된 파일명(UUID 포함)이 있으면 사용
+                    savedFileName = serverSavedFileName
+                    Log.d(TAG, "로컬 파일: 서버 저장 파일명 사용: $savedFileName")
+                } else {
+                    // 캐시된 정보가 없으면 원본 파일명 사용
+                    savedFileName = originalFileName
+                    Log.d(TAG, "로컬 파일: 서버 저장 파일명을 찾을 수 없어 원본 파일명 사용: $savedFileName")
+                }
             } else {
-                // 캐시된 정보가 없으면 원본 파일명 사용
-                savedFileName = originalFileName
-                Log.d(TAG, "서버 저장 파일명을 찾을 수 없어 원본 파일명 사용: $savedFileName")
+                // 파일이 존재하지 않으면 Intent에서 받은 fileName 사용
+                savedFileName = fileName
+                Log.d(TAG, "로컬 파일: 파일을 찾을 수 없어 전달받은 파일명 사용: $savedFileName")
             }
-        } else {
-            // 파일이 존재하지 않으면 Intent에서 받은 fileName 사용
+        } else if (savedFileName.isEmpty()) {
+            // 서버 파일인데 savedFileName이 비어있는 경우 (예외 상황)
             savedFileName = fileName
-            Log.d(TAG, "파일을 찾을 수 없어 전달받은 파일명 사용: $savedFileName")
+            Log.w(TAG, "서버 파일이지만 savedFileName이 비어있어 fileName 사용: $savedFileName")
         }
     }
 
@@ -190,16 +213,143 @@ class RecordingDetailActivity : AppCompatActivity() {
             requestSummary(savedFileName)
         }
 
-        // 녹음 파일 재생 버튼 클릭 리스너
-        playButton.setOnClickListener {
-            if (isPlaying) {
-                pausePlayback()
+        // 다운로드 버튼 클릭 리스너
+        downloadButton.setOnClickListener {
+            if (isServerFile && !isDownloaded) {
+                downloadServerFile()
             } else {
-                playRecording()
+                Toast.makeText(this, "이미 다운로드되었거나 로컬 파일입니다.", Toast.LENGTH_SHORT).show()
             }
         }
 
+        // 녹음 파일 재생 버튼 클릭 리스너
+        playButton.setOnClickListener {
+            if (isServerFile && !isDownloaded) {
+                // 서버 파일이고 다운로드되지 않은 경우
+                Toast.makeText(this, "먼저 파일을 다운로드해주세요.", Toast.LENGTH_LONG).show()
+            } else if (filePath.isEmpty()) {
+                // 파일 경로가 없는 경우
+                Toast.makeText(this, "재생할 수 있는 파일이 없습니다.", Toast.LENGTH_SHORT).show()
+            } else {
+                // 재생 가능한 경우
+                if (isPlaying) {
+                    pausePlayback()
+                } else {
+                    playRecording()
+                }
+            }
+        }
+
+        // 다운로드 버튼 표시/숨김 처리
+        if (isServerFile && !isDownloaded) {
+            downloadButton.visibility = android.view.View.VISIBLE
+        } else {
+            downloadButton.visibility = android.view.View.GONE
+        }
+
         Log.d(TAG, "버튼 리스너 설정 완료")
+    }
+
+    private fun downloadServerFile() {
+        val progressDialog = ProgressDialog(this).apply {
+            setMessage("파일 다운로드 중...")
+            setCancelable(false)
+            show()
+        }
+
+        // JWT 토큰 가져오기
+        val token = getJwtToken()
+        if (token.isEmpty()) {
+            progressDialog.dismiss()
+            Toast.makeText(this, "로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        thread {
+            try {
+                val downloadClient = OkHttpClient.Builder()
+                    .connectTimeout(60, TimeUnit.SECONDS)
+                    .readTimeout(60, TimeUnit.SECONDS)
+                    .writeTimeout(60, TimeUnit.SECONDS)
+                    .build()
+
+                // 서버 파일 다운로드 API 호출 (url 구현X)
+                val request = Request.Builder()
+                    .url("http://10.0.2.2:8080/$savedFileName")
+                    .get()
+                    .header("Authorization", "Bearer $token")
+                    .build()
+
+                downloadClient.newCall(request).execute().use { response ->
+                    if (response.isSuccessful) {
+                        val responseBody = response.body
+                        if (responseBody != null) {
+                            // 다운로드 디렉토리 생성
+                            val downloadsDir = File(getExternalFilesDir(null), "downloads")
+                            if (!downloadsDir.exists()) {
+                                downloadsDir.mkdirs()
+                            }
+
+                            // 파일 저장
+                            val downloadedFile = File(downloadsDir, savedFileName)
+                            saveFileFromResponse(responseBody, downloadedFile)
+
+                            runOnUiThread {
+                                progressDialog.dismiss()
+                                Toast.makeText(this@RecordingDetailActivity, "다운로드 완료!", Toast.LENGTH_SHORT).show()
+
+                                // 다운로드 상태 업데이트
+                                isDownloaded = true
+                                filePath = downloadedFile.absolutePath
+
+                                // UI 업데이트
+                                displayFileInfo()
+                                downloadButton.visibility = android.view.View.GONE
+                            }
+                        } else {
+                            runOnUiThread {
+                                progressDialog.dismiss()
+                                Toast.makeText(this@RecordingDetailActivity, "다운로드 실패: 응답이 비어있습니다.", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    } else {
+                        runOnUiThread {
+                            progressDialog.dismiss()
+                            val errorMessage = when (response.code) {
+                                401 -> "인증이 만료되었습니다. 다시 로그인해주세요."
+                                404 -> "서버에서 파일을 찾을 수 없습니다."
+                                else -> "다운로드 실패: ${response.code}"
+                            }
+                            Toast.makeText(this@RecordingDetailActivity, errorMessage, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "다운로드 오류: ${e.message}", e)
+                runOnUiThread {
+                    progressDialog.dismiss()
+                    Toast.makeText(this@RecordingDetailActivity, "다운로드 중 오류가 발생했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun saveFileFromResponse(responseBody: okhttp3.ResponseBody, file: File) {
+        try {
+            responseBody.byteStream().use { inputStream ->
+                java.io.FileOutputStream(file).use { outputStream ->
+                    val buffer = ByteArray(4096)
+                    var bytesRead: Int
+                    while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                        outputStream.write(buffer, 0, bytesRead)
+                    }
+                    outputStream.flush()
+                }
+            }
+        } catch (e: IOException) {
+            Log.e(TAG, "파일 저장 오류: ${e.message}", e)
+            throw e
+        }
     }
 
     private fun setupBottomNavigation() {
@@ -268,7 +418,6 @@ class RecordingDetailActivity : AppCompatActivity() {
         thread {
             try {
                 // POST 요청 본문 생성
-                // 여기서 파일명을 그대로 사용 - UUID 접두사까지 포함한 전체 파일명 전송
                 val requestBody = FormBody.Builder()
                     .add("savedFileName", savedFileName) // 서버에 저장된 실제 파일명 사용 (UUID 접두사 포함)
                     .build()
@@ -372,12 +521,12 @@ class RecordingDetailActivity : AppCompatActivity() {
         // 백그라운드 스레드에서 네트워크 요청 수행
         thread {
             try {
-                // POST 요청 본문 생성 - UUID 접두사까지 포함한 전체 파일명
+                // POST 요청 본문 생성
                 val requestBody = FormBody.Builder()
                     .add("savedFileName", savedFileName) // 서버에 저장된 실제 파일명 사용
                     .build()
 
-                // API 엔드포인트 URL (localhost 대신 10.0.2.2 사용)
+                // API 엔드포인트 URL
                 val url = "http://10.0.2.2:8080/ai/gemini"
                 Log.d(TAG, "요약 요청 URL: $url")
                 Log.d(TAG, "요청 파라미터: savedFileName=$savedFileName") // 파라미터 로깅 추가
