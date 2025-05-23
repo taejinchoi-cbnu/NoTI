@@ -3,6 +3,7 @@ package com.expert.project.noty.service.auth;
 import com.expert.project.noty.dto.auth.LoginRequest;
 import com.expert.project.noty.dto.auth.ModifyRequest;
 import com.expert.project.noty.dto.auth.RegisterRequest;
+import com.expert.project.noty.dto.auth.UserInfoResponse;
 import com.expert.project.noty.entity.UserEntity;
 import com.expert.project.noty.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -65,9 +66,14 @@ public class UserService {
         UserEntity userEntity = userOpt.get();
 
         userEntity.setPassword(passwordEncoder.encode(request.getNewPassword()));
-        System.out.println("되나?");
         userRepository.save(userEntity);
 
         return "비밀번호 변경 성공";
+    }
+
+    public UserInfoResponse getUserById(String userId) {
+        UserEntity userEntity = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return new UserInfoResponse(userEntity.getUserId(), userEntity.getNickname(), userEntity.getEmail());
     }
 }

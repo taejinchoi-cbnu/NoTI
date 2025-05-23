@@ -4,6 +4,7 @@ import com.expert.project.noty.dto.auth.*;
 import com.expert.project.noty.service.auth.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,7 +43,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/modify")
+    @PostMapping("/modify/password")
     public ResponseEntity<ModifyResponse> modify(@RequestBody ModifyRequest request) {
         String result = userService.modify(request);
 
@@ -52,5 +53,14 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(new ModifyResponse("비밀번호 변경 실패"));
         }
+    }
+
+    @PostMapping("/get/user-information")
+    public ResponseEntity<UserInfoResponse> getUserInfo() {
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        UserInfoResponse userResponse = userService.getUserById(userId);
+
+        return ResponseEntity.ok(userResponse);
     }
 }

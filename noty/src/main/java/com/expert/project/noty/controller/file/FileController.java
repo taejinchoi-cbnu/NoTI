@@ -47,8 +47,7 @@ public class FileController {
 
     // TODO: 현재 저장되어 있는 유저의 파일 데이터 전송
     @PostMapping("/get/file-information")
-    public ResponseEntity<List<AudioGetFileInformationResponse>> getMyAudioFiles(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        // JWT로부터 userId 추출 (예시로 username이라고 가정)
+    public ResponseEntity<List<AudioGetFileInformationResponse>> getMyAudioFiles() {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
 
         List<AudioGetFileInformationResponse> files = audioFileService.getAudioFilesByUserId(userId);
