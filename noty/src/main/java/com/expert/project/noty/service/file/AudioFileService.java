@@ -17,6 +17,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -92,5 +93,22 @@ public class    AudioFileService {
                         .duration(file.getDuration())
                         .build()
                 ).collect(Collectors.toList());
+    }
+
+    public String renameFile(String userId, String savedFileName, String setName) {
+        Optional<AudioFileEntity> optionalFile = audioFileRepository.findByUserIdAndSavedName(userId, savedFileName);
+        if (optionalFile.isPresent()) {
+            AudioFileEntity fileEntity = optionalFile.get();
+
+            String savedName = UUID.randomUUID() + "_" + setName;
+            fileEntity.setOriginalName(setName);
+            fileEntity.setSavedName(savedName);
+
+            audioFileRepository.save(fileEntity);
+
+            return savedName;
+        }
+
+        return "fail";
     }
 }

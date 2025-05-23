@@ -10,4 +10,5 @@ public interface AudioFileRepository extends JpaRepository<AudioFileEntity, Long
 
     Optional<AudioFileEntity> findBySavedName(String savedName);
     List<AudioFileEntity> findByUserId(String userId);
+    Optional<AudioFileEntity> findByUserIdAndSavedName(String userId, String savedFileName);
 }

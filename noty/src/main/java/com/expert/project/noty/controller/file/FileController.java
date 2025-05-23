@@ -3,6 +3,7 @@ package com.expert.project.noty.controller.file;
 
 import com.expert.project.noty.dto.auth.CustomUserDetails;
 import com.expert.project.noty.dto.file.AudioGetFileInformationResponse;
+import com.expert.project.noty.dto.file.AudioNameModifyRespond;
 import com.expert.project.noty.dto.file.AudioUploadRequest;
 import com.expert.project.noty.entity.AudioFileEntity;
 import com.expert.project.noty.service.ai.GeminiService;
@@ -45,7 +46,6 @@ public class FileController {
         }
     }
 
-    // TODO: 현재 저장되어 있는 유저의 파일 데이터 전송
     @PostMapping("/get/file-information")
     public ResponseEntity<List<AudioGetFileInformationResponse>> getMyAudioFiles() {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -53,5 +53,24 @@ public class FileController {
         List<AudioGetFileInformationResponse> files = audioFileService.getAudioFilesByUserId(userId);
 
         return ResponseEntity.ok(files);
+    }
+
+    @PostMapping("/modify/name")
+    public ResponseEntity<AudioNameModifyRespond> modifyFileName(
+            @RequestParam("savedFileName") String savedFileName,
+            @RequestParam("setName") String setName) {
+
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        String newSavedFileName = audioFileService.renameFile(userId, savedFileName, setName);
+
+        AudioNameModifyRespond audioNameModifyRespond = new AudioNameModifyRespond(newSavedFileName);
+
+        if (newSavedFileName.equals("fail")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(audioNameModifyRespond);
+        } else {
+            return ResponseEntity.ok(audioNameModifyRespond);
+        }
     }
 }
