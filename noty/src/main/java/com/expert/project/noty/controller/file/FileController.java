@@ -73,4 +73,19 @@ public class FileController {
             return ResponseEntity.ok(audioNameModifyRespond);
         }
     }
+
+    @PostMapping("/delete")
+    public ResponseEntity<String> deleteFile(
+            @RequestParam("savedFileName") String savedFileName) {
+
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        boolean deleted = audioFileService.deleteFile(userId, savedFileName);
+
+        if (deleted) {
+            return ResponseEntity.ok("파일 삭제 성공");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("파일 삭제 실패");
+        }
+    }
 }

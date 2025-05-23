@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -98,17 +99,50 @@ public class    AudioFileService {
     public String renameFile(String userId, String savedFileName, String setName) {
         Optional<AudioFileEntity> optionalFile = audioFileRepository.findByUserIdAndSavedName(userId, savedFileName);
         if (optionalFile.isPresent()) {
-            AudioFileEntity fileEntity = optionalFile.get();
+            AudioFileEntity audioFileEntity = optionalFile.get();
 
             String savedName = UUID.randomUUID() + "_" + setName;
-            fileEntity.setOriginalName(setName);
-            fileEntity.setSavedName(savedName);
+            File oldFile = new File(audioFileEntity.getFilePath());
 
-            audioFileRepository.save(fileEntity);
+            // 새 파일 경로 생성
+            File parentDir = oldFile.getParentFile();
+            File newFile = new File(parentDir, savedName);
 
-            return savedName;
+            String newFilePath = parentDir + "/" + savedName;
+
+            // 실제 파일 이름 변경
+            boolean renamed = oldFile.renameTo(newFile);
+            if (renamed) {
+                // DB 업데이트
+                audioFileEntity.setOriginalName(setName);
+                audioFileEntity.setSavedName(savedName);
+                audioFileEntity.setFilePath(newFilePath);
+
+                audioFileRepository.save(audioFileEntity);
+                return savedName;
+            }
         }
 
         return "fail";
+    }
+
+    public boolean deleteFile(String userId, String savedFileName) {
+        Optional<AudioFileEntity> optionalFile = audioFileRepository.findByUserIdAndSavedName(userId, savedFileName);
+
+        if (optionalFile.isPresent()) {
+            AudioFileEntity audioFileEntity = optionalFile.get();
+
+            // 실제 파일 삭제
+            File physicalFile = new File(audioFileEntity.getFilePath());
+            boolean fileDeleted = physicalFile.delete();
+
+            // 파일이 실제로 삭제되었을 때만 DB에서 삭제
+            if (fileDeleted) {
+                audioFileRepository.delete(audioFileEntity);
+                return true;
+            }
+        }
+
+        return false;
     }
 }
