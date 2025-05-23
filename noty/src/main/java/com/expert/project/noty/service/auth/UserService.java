@@ -1,11 +1,9 @@
 package com.expert.project.noty.service.auth;
 
-import com.expert.project.noty.dto.auth.LoginRequest;
-import com.expert.project.noty.dto.auth.ModifyRequest;
-import com.expert.project.noty.dto.auth.RegisterRequest;
-import com.expert.project.noty.dto.auth.UserInfoResponse;
+import com.expert.project.noty.dto.auth.*;
 import com.expert.project.noty.entity.UserEntity;
 import com.expert.project.noty.repository.UserRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -73,7 +71,23 @@ public class UserService {
 
     public UserInfoResponse getUserById(String userId) {
         UserEntity userEntity = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("유저를 찾지 못함"));
         return new UserInfoResponse(userEntity.getUserId(), userEntity.getNickname(), userEntity.getEmail());
+    }
+
+    public boolean updateUserInfo(UpdateUserRequest request) {
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<UserEntity> optionalUser = userRepository.findByUserId(userId);
+
+        if (optionalUser.isPresent()) {
+            UserEntity userEntity = optionalUser.get();
+            userEntity.setUserId(request.getUserId());
+            userEntity.setNickname(request.getNickname());
+            userEntity.setEmail(request.getEmail());
+            userRepository.save(userEntity);
+            return true;
+        }
+
+        return false;
     }
 }
