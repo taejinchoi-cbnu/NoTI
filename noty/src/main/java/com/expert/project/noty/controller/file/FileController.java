@@ -9,7 +9,10 @@ import com.expert.project.noty.entity.AudioFileEntity;
 import com.expert.project.noty.service.ai.GeminiService;
 import com.expert.project.noty.service.ai.WhisperService;
 import com.expert.project.noty.service.file.AudioFileService;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -87,5 +90,30 @@ public class FileController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("파일 삭제 실패");
         }
+    }
+
+    @PostMapping("/download")
+    public ResponseEntity<Resource> downloadAudioFile(
+            @RequestParam("savedFileName") String savedFileName) {
+
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        Resource resource = audioFileService.loadAudioFileAsResource(userId, savedFileName);
+
+        if (resource == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        String contentType;
+        try {
+            Path filePath = Paths.get(resource.getFile().getAbsolutePath());
+            contentType = Files.probeContentType(filePath);
+        } catch (IOException e) {
+            contentType = "application/octet-stream";
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION)
+                .body(resource);
     }
 }

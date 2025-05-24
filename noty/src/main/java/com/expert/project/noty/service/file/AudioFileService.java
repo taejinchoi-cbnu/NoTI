@@ -6,12 +6,15 @@ import com.expert.project.noty.entity.AudioFileEntity;
 import com.expert.project.noty.repository.AudioFileRepository;
 import com.expert.project.noty.service.ai.AudioProcessingService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -144,5 +147,24 @@ public class    AudioFileService {
         }
 
         return false;
+    }
+
+    public Resource loadAudioFileAsResource(String userId, String savedFileName) {
+        Optional<AudioFileEntity> optionalFile = audioFileRepository.findByUserIdAndSavedName(userId, savedFileName);
+
+        if (optionalFile.isPresent()) {
+            AudioFileEntity fileRecord = optionalFile.get();
+            Path filePath = Paths.get(fileRecord.getFilePath()).normalize();
+            try {
+                Resource resource = new UrlResource(filePath.toUri());
+                if (resource.exists()) {
+                    return resource;
+                }
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return null;
     }
 }
