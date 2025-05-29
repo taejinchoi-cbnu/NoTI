@@ -1,9 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- 기본 색상 -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="red">#FFD32F2F</color>
-    <color name="bgColor">#A8D7F9</color>
-    <color name="btnColor">#EFF0F2</color>
-    <color name="mainColor">#02590F</color>
+    <color name="mainColor">#4DD863</color>
+
+    <color name="naverGreen">#08AA5C</color>
+    <!-- 배경 색상 -->
+    <color name="bgColor">#FAFAFA</color>
+    <color name="btnColor">#F5F5F5</color>
+    <color name="cardBackground">#FFFFFF</color>
+
+    <!-- 로고 기반 그라데이션 초록 팔레트 -->
+    <color name="lightGreen">#E8F8E8</color> <!-- 연한 초록 배경 -->
+    <color name="accentGreen">#4DD863</color> <!-- 로고 메인 그라데이션 색상 -->
+    <color name="darkGreen">#2E7D32</color> <!-- 로고 진한 그라데이션 색상 -->
+    <color name="gradientStart">#4DD863</color> <!-- 그라데이션 시작 -->
+    <color name="gradientEnd">#2E7D32</color> <!-- 그라데이션 끝 -->
+
+    <!-- 텍스트 색상 -->
+    <color name="textPrimary">#333333</color>
+    <color name="textSecondary">#757575</color>
+    <color name="textTertiary">#9E9E9E</color> <!-- 더 연한 텍스트 -->
+
+    <!-- 테두리 색상 -->
+    <color name="borderLight">#E0E0E0</color>
+    <color name="borderMedium">#BDBDBD</color> <!-- 중간 강도 테두리 -->
+
+    <!-- 상태별 색상 -->
+    <color name="recordingActive">#FF5722</color> <!-- 녹음 중 빨간색 -->
+    <color name="recordingInactive">#9E9E9E</color> <!-- 비활성 상태 -->
+    <color name="successGreen">#4CAF50</color> <!-- 성공 상태 -->
+    <color name="warningOrange">#FF9800</color> <!-- 경고/대기 상태 -->
+
+    <!-- 투명도가 있는 색상 (오버레이용) -->
+    <color name="blackOverlay">#80000000</color> <!-- 50% 투명한 검은색 -->
+    <color name="whiteOverlay">#80FFFFFF</color> <!-- 50% 투명한 흰색 -->
 </resources>

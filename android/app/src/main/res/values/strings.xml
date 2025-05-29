@@ -7,11 +7,10 @@
     <string name="sign_in_button_text">가입하기</string>
     <string name="find_password_text">비밀번호를 잊어버리셨나요?</string>
     <string name="find_password_button_text">비밀번호 찾기</string>
-    <string name="or_text">----------------------또는--------------------</string>
     <string name="name_hint">이름</string>
     <string name="password_confirm_hint">비밀번호 확인</string>
     <string name="sign_up_button_text">가입</string>
     <string name="already_have_account">이미 계정이 있으신가요?</string>
-    <string name="splash_copyright">© note intelligence</string>
+    <string name="splash_copyright">© note intelligence </string>
     <string name="title_activity_item_recording.xml">item_recording.xml</string>
 </resources>
