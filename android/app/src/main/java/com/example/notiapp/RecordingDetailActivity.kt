@@ -539,6 +539,7 @@ class RecordingDetailActivity : AppCompatActivity() {
                     .build()
 
                 Log.d(TAG, "요청 메서드: ${request.method}")
+                Log.d(TAG, "요청 메서드: ${request.method}")
                 Log.d(TAG, "요청 헤더: ${request.headers}")
 
                 // 요청 실행

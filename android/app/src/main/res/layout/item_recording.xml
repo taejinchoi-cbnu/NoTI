@@ -5,11 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="4dp"
-    android:foreground="?attr/selectableItemBackground"
     android:clickable="true"
-    android:focusable="true">
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/recordingItemContainer"
@@ -23,9 +23,9 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:ellipsize="middle"
+            android:fontFamily="@font/pretendardregular"
             android:singleLine="true"
             android:text="녹음 파일명.mp3"
-            android:fontFamily="@font/pretendardregular"
             android:textSize="20sp"
             app:layout_constraintEnd_toStartOf="@+id/recordingPlayButton"
             app:layout_constraintStart_toStartOf="parent"
@@ -37,8 +37,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
-            android:text="2025-05-01 | 00:30"
             android:fontFamily="@font/pretendardregular"
+            android:text="2025-05-01 | 00:30"
             android:textSize="15sp"
             app:layout_constraintEnd_toStartOf="@+id/recordingPlayButton"
             app:layout_constraintStart_toStartOf="parent"
@@ -56,7 +56,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/recordingPlayButton"
             app:layout_constraintTop_toTopOf="parent" />
-
+<!--TODO: 재생버튼 삭제(kt파일에도 삭제해야함)-->
         <ImageButton
             android:id="@+id/recordingPlayButton"
             android:layout_width="wrap_content"

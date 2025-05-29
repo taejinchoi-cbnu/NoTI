@@ -45,28 +45,34 @@
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="8dp"
         android:alpha="0.1"
-        android:background="@color/black"
+        android:background="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/recordingsTitle" />
 
     <!-- 스크롤 가능한 파일 목록 -->
+
+    <!-- 파일이 없을 때 표시할 메시지 -->
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recordingsRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
+        android:background="#F2F2F2"
         android:clipToPadding="false"
         android:fadeScrollbars="false"
+        android:paddingTop="10dp"
         android:paddingBottom="80dp"
-        android:scrollbars="vertical"
+        android:scrollbars="none"
         app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/divider"
+        app:layout_constraintVertical_bias="1.0"
         tools:listitem="@layout/item_recording" />
 
-    <!-- 파일이 없을 때 표시할 메시지 -->
     <LinearLayout
         android:id="@+id/emptyStateLayout"
         android:layout_width="wrap_content"
@@ -110,19 +116,22 @@
     </LinearLayout>
 
     <!-- 녹음하러 가기 버튼 -->
-    <Button
-        android:id="@+id/goToRec"
-        android:layout_width="wrap_content"
-        android:layout_height="60dp"
-        android:background="@drawable/ic_recording"
-        android:layout_marginBottom="20dp"
-        android:padding="20dp"
-        android:elevation="4dp"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- 하단 네비게이션 -->
+
+    <Button
+        android:id="@+id/goToRec"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/ic_recording"
+        android:elevation="4dp"
+        android:padding="20dp"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.916"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
         android:layout_width="0dp"

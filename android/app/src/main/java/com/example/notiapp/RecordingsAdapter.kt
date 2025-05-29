@@ -50,8 +50,6 @@ class RecordingsAdapter(
             val fileSizeKB = recording.fileSize / 1024
             holder.infoTextView.text = "${recording.date} | ${recording.duration} | ${fileSizeKB}KB (서버)"
 
-            // 서버 파일 색상 설정: #85a8ff
-            holder.cardView.setCardBackgroundColor(Color.parseColor("#85a8ff"))
 
             // 다운로드 버튼 표시
             holder.downloadButton.visibility = View.VISIBLE
@@ -67,9 +65,6 @@ class RecordingsAdapter(
         } else {
             // 로컬 파일: 기존 방식 유지
             holder.infoTextView.text = "${recording.date} | ${recording.duration}"
-
-            // 로컬 파일 색상 설정: #68ff7f
-            holder.cardView.setCardBackgroundColor(Color.parseColor("#68ff7f"))
 
             // 다운로드 버튼 숨김
             holder.downloadButton.visibility = View.GONE

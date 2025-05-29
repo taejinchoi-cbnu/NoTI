@@ -97,7 +97,7 @@
     <Button
         android:id="@+id/signUpBtn"
         style="@style/ButtonPrimary"
-        android:layout_width="220dp"
+        android:layout_width="310dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="@string/sign_up_button_text"
@@ -124,16 +124,18 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/pretendardregular"
             android:text="@string/already_have_account"
-            android:textColor="@color/mainColor"
+            android:textColor="@color/black"
             android:textSize="14sp" />
 
         <Button
             android:id="@+id/signInBtn"
             style="@style/ButtonSecondary"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="로그인" />
+            android:layout_width="50dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="4dp"
+            android:padding="0dp"
+            android:text="로그인"
+            android:textStyle="bold" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
