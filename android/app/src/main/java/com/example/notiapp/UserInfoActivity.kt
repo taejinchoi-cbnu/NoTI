@@ -47,7 +47,7 @@ class UserInfoActivity : AppCompatActivity() {
     private var isEditMode = false
     private var currentUserInfo: UserInfo? = null
 
-    // HTTP 클라이언트 (기존 프로젝트 패턴과 동일)
+    // HTTP 클라이언트
     private val client = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(15, TimeUnit.SECONDS)
@@ -156,7 +156,7 @@ class UserInfoActivity : AppCompatActivity() {
         progressBar.visibility = if (show) View.VISIBLE else View.GONE
     }
 
-    // 서버에서 사용자 정보 가져오기 (기존 프로젝트 패턴과 동일)
+    // 서버에서 사용자 정보 가져오기
     private fun fetchUserInfo() {
         // 로딩 표시
         showLoading(true)
@@ -173,7 +173,7 @@ class UserInfoActivity : AppCompatActivity() {
         // 백그라운드 스레드에서 네트워크 요청
         thread {
             try {
-                // POST 요청 생성 (빈 body) - 기존 프로젝트 패턴과 동일
+                // POST 요청 생성 (빈 body)
                 val requestBody = FormBody.Builder().build()
 
                 val request = Request.Builder()
@@ -381,7 +381,7 @@ class UserInfoActivity : AppCompatActivity() {
         // 백그라운드 스레드에서 네트워크 요청
         thread {
             try {
-                // POST 요청 본문 생성 (FormBody 사용 - 기존 프로젝트 패턴과 동일)
+                // POST 요청 본문 생성 FormBody 사용
                 val requestBody = FormBody.Builder()
                     .add("userId", userId)
                     .add("nickname", nickname)
@@ -468,7 +468,7 @@ class UserInfoActivity : AppCompatActivity() {
         emailText.text = "정보를 불러올 수 없음"
     }
 
-    // API 에러 처리 (기존 프로젝트 패턴과 동일)
+    // API 에러 처리
     private fun handleApiError(code: Int) {
         val errorMessage = when (code) {
             401 -> {
@@ -490,7 +490,7 @@ class UserInfoActivity : AppCompatActivity() {
         }
     }
 
-    // JWT 토큰 가져오기 (기존 프로젝트 패턴과 동일)
+    // JWT 토큰 가져오기
     private fun getJwtToken(): String {
         val sharedPreferences = getSharedPreferences("auth_prefs", MODE_PRIVATE)
         return sharedPreferences.getString("jwt_token", "") ?: ""
@@ -525,7 +525,7 @@ class UserInfoActivity : AppCompatActivity() {
         navigateToSignIn()
     }
 
-    // JWT 토큰 삭제 (기존 프로젝트 패턴과 동일)
+    // JWT 토큰 삭제
     private fun clearJwtToken() {
         val sharedPreferences = getSharedPreferences("auth_prefs", MODE_PRIVATE)
         sharedPreferences.edit()
@@ -533,7 +533,7 @@ class UserInfoActivity : AppCompatActivity() {
             .apply() // 비동기적으로 변경사항 적용
     }
 
-    // 로그인 화면으로 이동 (기존 프로젝트 패턴과 동일)
+    // 로그인 화면으로 이동
     private fun navigateToSignIn() {
         val intent = Intent(this, SignInActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
