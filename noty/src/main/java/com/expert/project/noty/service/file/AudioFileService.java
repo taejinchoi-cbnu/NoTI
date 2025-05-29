@@ -6,17 +6,22 @@ import com.expert.project.noty.entity.AudioFileEntity;
 import com.expert.project.noty.repository.AudioFileRepository;
 import com.expert.project.noty.service.ai.AudioProcessingService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -92,5 +97,74 @@ public class    AudioFileService {
                         .duration(file.getDuration())
                         .build()
                 ).collect(Collectors.toList());
+    }
+
+    public String renameFile(String userId, String savedFileName, String setName) {
+        Optional<AudioFileEntity> optionalFile = audioFileRepository.findByUserIdAndSavedName(userId, savedFileName);
+        if (optionalFile.isPresent()) {
+            AudioFileEntity audioFileEntity = optionalFile.get();
+
+            String savedName = UUID.randomUUID() + "_" + setName;
+            File oldFile = new File(audioFileEntity.getFilePath());
+
+            // 새 파일 경로 생성
+            File parentDir = oldFile.getParentFile();
+            File newFile = new File(parentDir, savedName);
+
+            String newFilePath = parentDir + "/" + savedName;
+
+            // 실제 파일 이름 변경
+            boolean renamed = oldFile.renameTo(newFile);
+            if (renamed) {
+                // DB 업데이트
+                audioFileEntity.setOriginalName(setName);
+                audioFileEntity.setSavedName(savedName);
+                audioFileEntity.setFilePath(newFilePath);
+
+                audioFileRepository.save(audioFileEntity);
+                return savedName;
+            }
+        }
+
+        return "fail";
+    }
+
+    public boolean deleteFile(String userId, String savedFileName) {
+        Optional<AudioFileEntity> optionalFile = audioFileRepository.findByUserIdAndSavedName(userId, savedFileName);
+
+        if (optionalFile.isPresent()) {
+            AudioFileEntity audioFileEntity = optionalFile.get();
+
+            // 실제 파일 삭제
+            File physicalFile = new File(audioFileEntity.getFilePath());
+            boolean fileDeleted = physicalFile.delete();
+
+            // 파일이 실제로 삭제되었을 때만 DB에서 삭제
+            if (fileDeleted) {
+                audioFileRepository.delete(audioFileEntity);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public Resource loadAudioFileAsResource(String userId, String savedFileName) {
+        Optional<AudioFileEntity> optionalFile = audioFileRepository.findByUserIdAndSavedName(userId, savedFileName);
+
+        if (optionalFile.isPresent()) {
+            AudioFileEntity fileRecord = optionalFile.get();
+            Path filePath = Paths.get(fileRecord.getFilePath()).normalize();
+            try {
+                Resource resource = new UrlResource(filePath.toUri());
+                if (resource.exists()) {
+                    return resource;
+                }
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return null;
     }
 }
