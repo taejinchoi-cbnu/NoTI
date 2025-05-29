@@ -20,6 +20,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- 편집 모드 토글 버튼 -->
+    <Button
+        android:id="@+id/editToggleButton"
+        style="@style/ButtonSecondary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="편집"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/titleText"
+        app:layout_constraintBottom_toBottomOf="@id/titleText" />
+
     <androidx.cardview.widget.CardView
         android:id="@+id/userInfoCard"
         android:layout_width="0dp"
@@ -48,72 +60,139 @@
                 android:textColor="@color/mainColor"
                 android:layout_marginBottom="16dp" />
 
+            <!-- 아이디 영역 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:layout_marginBottom="12dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="아이디: "
-                    android:textSize="16sp"
-                    android:fontFamily="@font/pretendardbold" />
+                    android:text="아이디"
+                    android:textSize="14sp"
+                    android:fontFamily="@font/pretendardbold"
+                    android:layout_marginBottom="4dp" />
 
+                <!-- 읽기 모드 -->
                 <TextView
                     android:id="@+id/userIdText"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="로딩 중..."
                     android:textSize="16sp"
-                    android:fontFamily="@font/pretendardregular" />
+                    android:fontFamily="@font/pretendardregular"
+                    android:padding="12dp"
+                    android:background="@drawable/btn_secondary_background"
+                    android:visibility="visible" />
+
+                <!-- 편집 모드 -->
+                <EditText
+                    android:id="@+id/userIdEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/pretendardregular"
+                    android:backgroundTint="@color/mainColor"
+                    android:inputType="text"
+                    android:visibility="gone" />
             </LinearLayout>
 
+            <!-- 닉네임 영역 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:layout_marginBottom="12dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="닉네임: "
-                    android:textSize="16sp"
-                    android:fontFamily="@font/pretendardbold" />
+                    android:text="닉네임"
+                    android:textSize="14sp"
+                    android:fontFamily="@font/pretendardbold"
+                    android:layout_marginBottom="4dp" />
 
+                <!-- 읽기 모드 -->
                 <TextView
                     android:id="@+id/nicknameText"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="로딩 중..."
                     android:textSize="16sp"
-                    android:fontFamily="@font/pretendardregular" />
+                    android:fontFamily="@font/pretendardregular"
+                    android:padding="12dp"
+                    android:background="@drawable/btn_secondary_background"
+                    android:visibility="visible" />
+
+                <!-- 편집 모드 -->
+                <EditText
+                    android:id="@+id/nicknameEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/pretendardregular"
+                    android:backgroundTint="@color/mainColor"
+                    android:inputType="text"
+                    android:visibility="gone" />
             </LinearLayout>
 
+            <!-- 이메일 영역 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="이메일: "
-                    android:textSize="16sp"
-                    android:fontFamily="@font/pretendardbold" />
+                    android:text="이메일"
+                    android:textSize="14sp"
+                    android:fontFamily="@font/pretendardbold"
+                    android:layout_marginBottom="4dp" />
 
+                <!-- 읽기 모드 -->
                 <TextView
                     android:id="@+id/emailText"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="로딩 중..."
                     android:textSize="16sp"
-                    android:fontFamily="@font/pretendardregular" />
+                    android:fontFamily="@font/pretendardregular"
+                    android:padding="12dp"
+                    android:background="@drawable/btn_secondary_background"
+                    android:visibility="visible" />
+
+                <!-- 편집 모드 -->
+                <EditText
+                    android:id="@+id/emailEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/pretendardregular"
+                    android:backgroundTint="@color/mainColor"
+                    android:inputType="textEmailAddress"
+                    android:visibility="gone" />
             </LinearLayout>
+
         </LinearLayout>
     </androidx.cardview.widget.CardView>
+
+    <!-- 저장 버튼 (편집 모드에서만 표시) -->
+    <Button
+        android:id="@+id/saveButton"
+        style="@style/ButtonPrimary"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        android:text="저장"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/userInfoCard" />
 
     <Button
         android:id="@+id/logoutButton"
