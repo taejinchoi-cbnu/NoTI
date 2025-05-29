@@ -37,4 +37,14 @@
     <!-- 투명도가 있는 색상 (오버레이용) -->
     <color name="blackOverlay">#80000000</color> <!-- 50% 투명한 검은색 -->
     <color name="whiteOverlay">#80FFFFFF</color> <!-- 50% 투명한 흰색 -->
+
+    <!-- 카드 대시보드용 색상 -->
+    <color name="cardBlue">#E3F2FD</color>        <!-- 연한 파란색 -->
+    <color name="cardOrange">#FFF3E0</color>      <!-- 연한 주황색 -->
+    <color name="cardPurple">#F3E5F5</color>      <!-- 연한 보라색 -->
+    <color name="cardYellow">#FFFDE7</color>      <!-- 연한 노란색 -->
+
+    <!-- 필터 버튼용 색상 -->
+    <color name="filterActive">#4DD863</color>    <!-- 메인 색상 활용 -->
+    <color name="filterInactive">#F5F5F5</color>  <!-- 비활성 배경 -->
 </resources>

@@ -26,7 +26,6 @@ class RecordingsAdapter(
     inner class RecordingViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val filenameTextView: TextView = itemView.findViewById(R.id.recordingFileName)
         val infoTextView: TextView = itemView.findViewById(R.id.recordingInfo)
-        val playButton: ImageButton = itemView.findViewById(R.id.recordingPlayButton)
         val deleteButton: ImageButton = itemView.findViewById(R.id.recordingDeleteButton)
         val downloadButton: ImageButton = itemView.findViewById(R.id.recordingDownloadButton)
         val itemContainer: ConstraintLayout = itemView.findViewById(R.id.recordingItemContainer)
@@ -44,55 +43,30 @@ class RecordingsAdapter(
 
         holder.filenameTextView.text = recording.filename
 
-        // 서버 파일과 로컬 파일에 따라 정보 표시 방식 및 색상 변경
+        // 서버 파일과 로컬 파일에 따라 정보 표시 방식 변경
         if (recording.isServerFile) {
             // 서버 파일: 파일 크기 정보도 함께 표시
             val fileSizeKB = recording.fileSize / 1024
             holder.infoTextView.text = "${recording.date} | ${recording.duration} | ${fileSizeKB}KB (서버)"
 
-
             // 다운로드 버튼 표시
             holder.downloadButton.visibility = View.VISIBLE
-
-            // 다운로드 상태에 따른 재생 버튼 처리
-            if (recording.isDownloaded) {
-                holder.playButton.alpha = 1.0f
-                holder.playButton.isEnabled = true
-            } else {
-                holder.playButton.alpha = 0.5f
-                holder.playButton.isEnabled = false
-            }
         } else {
             // 로컬 파일: 기존 방식 유지
             holder.infoTextView.text = "${recording.date} | ${recording.duration}"
 
             // 다운로드 버튼 숨김
             holder.downloadButton.visibility = View.GONE
-
-            // 재생 버튼 활성화
-            holder.playButton.alpha = 1.0f
-            holder.playButton.isEnabled = true
         }
 
-        // 재생 버튼 아이콘 설정
-        holder.playButton.setImageResource(android.R.drawable.ic_media_play)
-
-        // 아이템 클릭 리스너
+        // 아이템 클릭 리스너 - 상세 화면으로 이동
         holder.itemContainer.setOnClickListener {
             navigateToDetail(holder, recording)
         }
 
-        // 재생 버튼 클릭 리스너
-        holder.playButton.setOnClickListener {
-            if (recording.isServerFile && !recording.isDownloaded) {
-                Toast.makeText(
-                    holder.itemView.context,
-                    "먼저 파일을 다운로드해주세요.",
-                    Toast.LENGTH_SHORT
-                ).show()
-            } else {
-                navigateToDetail(holder, recording)
-            }
+        // 카드뷰 클릭 리스너도 동일하게 설정
+        holder.cardView.setOnClickListener {
+            navigateToDetail(holder, recording)
         }
 
         // 다운로드 버튼 클릭 리스너

@@ -2,14 +2,17 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/recordingCardView"
+    style="@style/CardMinimal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="2dp">
+    app:cardCornerRadius="12dp"
+    app:cardElevation="0dp"
+    app:contentPadding="8dp"
+    android:background="@drawable/button_minimal">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/recordingItemContainer"
@@ -17,65 +20,59 @@
         android:layout_height="wrap_content"
         android:padding="16dp">
 
+        <!-- 파일명 -->
         <TextView
             android:id="@+id/recordingFileName"
+            style="@style/TextBody1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="12dp"
             android:ellipsize="middle"
-            android:fontFamily="@font/pretendardregular"
             android:singleLine="true"
             android:text="녹음 파일명.mp3"
-            android:textSize="20sp"
-            app:layout_constraintEnd_toStartOf="@+id/recordingPlayButton"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toStartOf="@+id/recordingDeleteButton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <!-- 파일 정보 (날짜, 시간, 크기 등) -->
         <TextView
             android:id="@+id/recordingInfo"
+            style="@style/TextBody2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:layout_marginEnd="8dp"
-            android:fontFamily="@font/pretendardregular"
+            android:layout_marginEnd="12dp"
             android:text="2025-05-01 | 00:30"
-            android:textSize="15sp"
-            app:layout_constraintEnd_toStartOf="@+id/recordingPlayButton"
+            app:layout_constraintEnd_toStartOf="@+id/recordingDeleteButton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/recordingFileName" />
 
+        <!-- 다운로드 버튼 (서버 파일용) -->
         <ImageButton
             android:id="@+id/recordingDownloadButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/filter_button_inactive"
             android:contentDescription="다운로드"
             android:padding="8dp"
+            android:scaleType="centerInside"
             android:src="@android:drawable/stat_sys_download"
             android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/recordingPlayButton"
-            app:layout_constraintTop_toTopOf="parent" />
-<!--TODO: 재생버튼 삭제(kt파일에도 삭제해야함)-->
-        <ImageButton
-            android:id="@+id/recordingPlayButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="재생"
-            android:padding="8dp"
-            android:src="@android:drawable/ic_media_play"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/recordingDeleteButton"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <!-- 삭제 버튼 -->
         <ImageButton
             android:id="@+id/recordingDeleteButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/filter_button_inactive"
             android:contentDescription="삭제"
             android:padding="8dp"
+            android:scaleType="centerInside"
             android:src="@android:drawable/ic_menu_delete"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

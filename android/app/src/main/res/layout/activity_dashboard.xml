@@ -8,34 +8,330 @@
     android:background="@color/white"
     tools:context=".DashBoardActivity">
 
-    <!-- 파일 목록 제목 -->
-    <TextView
-        android:id="@+id/recordingsTitle"
-        android:layout_width="wrap_content"
+    <!-- ========== 상단 Header 섹션 ========== -->
+    <LinearLayout
+        android:id="@+id/headerLayout"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:fontFamily="@font/pretendardbold"
-        android:text="녹음 파일 목록"
-        android:textColor="@color/black"
-        android:textSize="20sp"
+        android:layout_marginEnd="16dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- 로고와 앱 이름 -->
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="12dp"
+            android:scaleType="centerCrop"
+            app:srcCompat="@drawable/newlogo" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Noti"
+            style="@style/TextHeading1" />
+
+    </LinearLayout>
+
+    <!-- ========== 카드 대시보드 섹션 ========== -->
+    <HorizontalScrollView
+        android:id="@+id/dashboardCardsScrollView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:scrollbars="none"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
+
+            <!-- 카드 1 -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/dashboardCard1"
+                style="@style/CardMinimalLarge"
+                android:layout_width="280dp"
+                android:layout_height="150dp"
+                android:layout_marginEnd="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="@color/cardBlue">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/TextBody1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Google 홈페이지"
+                            android:textColor="@color/textPrimary" />
+
+                        <TextView
+                            style="@style/TextBody2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="구글에서 더 많은 정보를 찾아보세요" />
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="12dp"
+                        android:src="@android:drawable/ic_menu_search" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- 카드 2 -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/dashboardCard2"
+                style="@style/CardMinimalLarge"
+                android:layout_width="280dp"
+                android:layout_height="150dp"
+                android:layout_marginEnd="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="@color/cardOrange">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/TextBody1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="타이틀"
+                            android:textColor="@color/textPrimary" />
+
+                        <TextView
+                            style="@style/TextBody2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="설명텍스트 이미지 src변경 가능" />
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="12dp"
+                        android:src="@android:drawable/ic_menu_info_details" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- 카드 3 -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/dashboardCard3"
+                style="@style/CardMinimalLarge"
+                android:layout_width="280dp"
+                android:layout_height="150dp"
+                android:layout_marginEnd="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="@color/cardPurple">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/TextBody1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="타이틀"
+                            android:textColor="@color/textPrimary" />
+
+                        <TextView
+                            style="@style/TextBody2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="설명텍스트 이미지 src변경 가능" />
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="12dp"
+                        android:src="@android:drawable/ic_menu_preferences" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- 카드 4 -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/dashboardCard4"
+                style="@style/CardMinimalLarge"
+                android:layout_width="280dp"
+                android:layout_height="120dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="@color/cardYellow">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/TextBody1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="타이틀"
+                            android:textColor="@color/textPrimary" />
+
+                        <TextView
+                            style="@style/TextBody2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="설명텍스트 이미지 src변경 가능" />
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="12dp"
+                        android:src="@android:drawable/ic_menu_help" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- ========== 파일 목록 섹션 ========== -->
+    <!-- 파일 목록 제목과 필터 버튼 -->
+    <LinearLayout
+        android:id="@+id/fileListHeaderLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="16dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dashboardCardsScrollView">
+
+        <TextView
+            android:id="@+id/recordingsTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/pretendardbold"
+            android:text="녹음 파일 목록"
+            android:textColor="@color/black"
+            android:textSize="20sp" />
+
+        <!-- 필터 버튼 그룹 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/filterAllButton"
+                style="@style/FilterButtonActive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="전체" />
+
+            <Button
+                android:id="@+id/filterLocalButton"
+                style="@style/FilterButtonInactive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="내 기기" />
+
+            <Button
+                android:id="@+id/filterServerButton"
+                style="@style/FilterButtonInactive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="서버" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
     <!-- 파일 개수 표시 -->
     <TextView
         android:id="@+id/fileCountText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
         android:alpha="0.7"
         android:fontFamily="@font/pretendardregular"
         android:text="총 0개 파일"
         android:textColor="@color/black"
         android:textSize="14sp"
-        app:layout_constraintBottom_toBottomOf="@id/recordingsTitle"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/recordingsTitle" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/fileListHeaderLayout" />
 
     <!-- 구분선 -->
     <View
@@ -44,16 +340,14 @@
         android:layout_height="1dp"
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         android:alpha="0.1"
-        android:background="@color/white"
+        android:background="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/recordingsTitle" />
+        app:layout_constraintTop_toBottomOf="@id/fileCountText" />
 
-    <!-- 스크롤 가능한 파일 목록 -->
-
-    <!-- 파일이 없을 때 표시할 메시지 -->
-
+    <!-- 파일 목록 -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recordingsRecyclerView"
         android:layout_width="match_parent"
@@ -67,12 +361,11 @@
         android:scrollbars="none"
         app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/divider"
-        app:layout_constraintVertical_bias="1.0"
         tools:listitem="@layout/item_recording" />
 
+    <!-- 파일이 없을 때 표시할 메시지 -->
     <LinearLayout
         android:id="@+id/emptyStateLayout"
         android:layout_width="wrap_content"
@@ -116,9 +409,6 @@
     </LinearLayout>
 
     <!-- 녹음하러 가기 버튼 -->
-
-    <!-- 하단 네비게이션 -->
-
     <Button
         android:id="@+id/goToRec"
         android:layout_width="70dp"
@@ -132,14 +422,12 @@
         app:layout_constraintHorizontal_bias="0.916"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <!-- 하단 네비게이션 -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
+        style="@style/BottomNavigationMinimal"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="?android:attr/windowBackground"
-        app:itemTextColor="@color/black"
-        app:itemIconTint="@color/black"
-        app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

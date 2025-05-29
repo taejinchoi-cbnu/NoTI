@@ -2,6 +2,7 @@ package com.example.notiapp
 
 import android.app.ProgressDialog
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.app.ActivityOptions
@@ -12,6 +13,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -40,6 +42,22 @@ class DashBoardActivity : AppCompatActivity() {
     private lateinit var fileCountText: TextView
     private lateinit var emptyStateLayout: LinearLayout
 
+    // 새로 추가할 변수들
+    private lateinit var filterAllButton: Button
+    private lateinit var filterLocalButton: Button
+    private lateinit var filterServerButton: Button
+
+    // 필터링 상태 관리
+    private var currentFilter = FilterType.ALL
+    private var allRecordings = mutableListOf<RecordingItem>() // 원본 데이터 저장용
+
+    // 필터 타입 enum
+    enum class FilterType {
+        ALL,      // 전체
+        LOCAL,    // 내 기기 (로컬 + 다운로드된 서버 파일)
+        SERVER    // 서버만 (다운로드되지 않은 서버 파일)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -63,6 +81,12 @@ class DashBoardActivity : AppCompatActivity() {
         // UI 요소 초기화
         initializeViews()
 
+        // 카드 클릭 리스너 설정
+        setupDashboardCards()
+
+        // 필터 버튼 설정
+        setupFilterButtons()
+
         // 녹음하러가기 버튼 설정
         val goToRecButton: Button = findViewById(R.id.goToRec)
         goToRecButton.setOnClickListener {
@@ -81,9 +105,120 @@ class DashBoardActivity : AppCompatActivity() {
     }
 
     private fun initializeViews() {
+        // 기존 요소들
         recordingsRecyclerView = findViewById(R.id.recordingsRecyclerView)
         fileCountText = findViewById(R.id.fileCountText)
         emptyStateLayout = findViewById(R.id.emptyStateLayout)
+
+        // 새로 추가되는 필터 버튼들
+        filterAllButton = findViewById(R.id.filterAllButton)
+        filterLocalButton = findViewById(R.id.filterLocalButton)
+        filterServerButton = findViewById(R.id.filterServerButton)
+    }
+
+    // TODO: Notion 링크로 연결해줘야함
+    private fun setupDashboardCards() {
+        // 카드 1 - Google 홈페이지
+        findViewById<CardView>(R.id.dashboardCard1).setOnClickListener {
+            openUrlInBrowser("https://www.google.com")
+        }
+
+        // 카드 2 - Google 홈페이지 (개발 문서 - 임시)
+        findViewById<CardView>(R.id.dashboardCard2).setOnClickListener {
+            openUrlInBrowser("https://www.google.com")
+        }
+
+        // 카드 3 - Google 홈페이지 (설정 가이드 - 임시)
+        findViewById<CardView>(R.id.dashboardCard3).setOnClickListener {
+            openUrlInBrowser("https://www.google.com")
+        }
+
+        // 카드 4 - Google 홈페이지 (지원 센터 - 임시)
+        findViewById<CardView>(R.id.dashboardCard4).setOnClickListener {
+            openUrlInBrowser("https://www.google.com")
+        }
+    }
+
+    private fun openUrlInBrowser(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+        } catch (e: Exception) {
+            Log.e("DashBoardActivity", "URL 열기 실패: ${e.message}")
+            Toast.makeText(this, "링크를 열 수 없습니다.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun setupFilterButtons() {
+        filterAllButton.setOnClickListener {
+            setActiveFilter(FilterType.ALL)
+        }
+
+        filterLocalButton.setOnClickListener {
+            setActiveFilter(FilterType.LOCAL)
+        }
+
+        filterServerButton.setOnClickListener {
+            setActiveFilter(FilterType.SERVER)
+        }
+    }
+
+    private fun setActiveFilter(filterType: FilterType) {
+        // 이전 필터와 같으면 무시
+        if (currentFilter == filterType) return
+
+        currentFilter = filterType
+
+        // 버튼 상태 업데이트
+        updateFilterButtonStyles()
+
+        // 필터링된 데이터 적용
+        applyFilter()
+    }
+
+    private fun updateFilterButtonStyles() {
+        // 모든 버튼 비활성 상태로 설정
+        filterAllButton.setBackgroundResource(R.drawable.filter_button_inactive)
+        filterAllButton.setTextColor(resources.getColor(R.color.textSecondary, null))
+
+        filterLocalButton.setBackgroundResource(R.drawable.filter_button_inactive)
+        filterLocalButton.setTextColor(resources.getColor(R.color.textSecondary, null))
+
+        filterServerButton.setBackgroundResource(R.drawable.filter_button_inactive)
+        filterServerButton.setTextColor(resources.getColor(R.color.textSecondary, null))
+
+        // 선택된 버튼만 활성 상태로 설정
+        when (currentFilter) {
+            FilterType.ALL -> {
+                filterAllButton.setBackgroundResource(R.drawable.filter_button_active)
+                filterAllButton.setTextColor(resources.getColor(R.color.white, null))
+            }
+            FilterType.LOCAL -> {
+                filterLocalButton.setBackgroundResource(R.drawable.filter_button_active)
+                filterLocalButton.setTextColor(resources.getColor(R.color.white, null))
+            }
+            FilterType.SERVER -> {
+                filterServerButton.setBackgroundResource(R.drawable.filter_button_active)
+                filterServerButton.setTextColor(resources.getColor(R.color.white, null))
+            }
+        }
+    }
+
+    private fun applyFilter() {
+        val filteredRecordings = when (currentFilter) {
+            FilterType.ALL -> allRecordings.toList()
+            FilterType.LOCAL -> allRecordings.filter { recording ->
+                // 로컬 파일이거나 다운로드된 서버 파일
+                !recording.isServerFile || (recording.isServerFile && recording.isDownloaded)
+            }
+            FilterType.SERVER -> allRecordings.filter { recording ->
+                // 서버 파일이면서 다운로드되지 않은 파일
+                recording.isServerFile && !recording.isDownloaded
+            }
+        }
+
+        // UI 업데이트
+        updateUI(filteredRecordings)
     }
 
     private fun setupRecyclerView() {
@@ -147,9 +282,13 @@ class DashBoardActivity : AppCompatActivity() {
         fetchServerRecordings { serverRecordings ->
             val combinedRecordings = combineRecordings(localRecordings, serverRecordings)
 
+            // 원본 데이터 저장
+            allRecordings.clear()
+            allRecordings.addAll(combinedRecordings)
+
             // UI 스레드에서 어댑터 업데이트
             runOnUiThread {
-                updateUI(combinedRecordings)
+                applyFilter() // 현재 필터에 맞게 데이터 적용
             }
         }
     }
@@ -157,23 +296,40 @@ class DashBoardActivity : AppCompatActivity() {
     private fun updateUI(recordings: List<RecordingItem>) {
         recordingsAdapter.updateRecordings(recordings)
 
-        // 파일 개수 업데이트
-        val localCount = recordings.count { !it.isServerFile }
-        val serverCount = recordings.count { it.isServerFile }
+        // 파일 개수 업데이트 (필터별로)
         val totalCount = recordings.size
-
-        fileCountText.text = when {
-            totalCount == 0 -> "파일 없음"
-            localCount > 0 && serverCount > 0 -> "총 ${totalCount}개 (로컬 ${localCount}개, 서버 ${serverCount}개)"
-            localCount > 0 -> "총 ${totalCount}개 (로컬 파일)"
-            serverCount > 0 -> "총 ${totalCount}개 (서버 파일)"
-            else -> "총 ${totalCount}개 파일"
+        val filterText = when (currentFilter) {
+            FilterType.ALL -> {
+                val localCount = allRecordings.count { !it.isServerFile || (it.isServerFile && it.isDownloaded) }
+                val serverCount = allRecordings.count { it.isServerFile && !it.isDownloaded }
+                when {
+                    totalCount == 0 -> "파일 없음"
+                    localCount > 0 && serverCount > 0 -> "총 ${totalCount}개 (로컬 ${localCount}개, 서버 ${serverCount}개)"
+                    localCount > 0 -> "총 ${totalCount}개 (로컬 파일)"
+                    serverCount > 0 -> "총 ${totalCount}개 (서버 파일)"
+                    else -> "총 ${totalCount}개 파일"
+                }
+            }
+            FilterType.LOCAL -> if (totalCount == 0) "내 기기에 파일 없음" else "내 기기: ${totalCount}개 파일"
+            FilterType.SERVER -> if (totalCount == 0) "서버에 파일 없음" else "서버: ${totalCount}개 파일"
         }
+
+        fileCountText.text = filterText
 
         // 빈 상태 처리
         if (recordings.isEmpty()) {
             recordingsRecyclerView.visibility = View.GONE
             emptyStateLayout.visibility = View.VISIBLE
+
+            // 빈 상태 메시지도 필터에 따라 변경
+            val emptyMessageView = emptyStateLayout.getChildAt(1) as? TextView
+            if (emptyMessageView != null) {
+                emptyMessageView.text = when (currentFilter) {
+                    FilterType.ALL -> "저장된 녹음 파일이 없습니다"
+                    FilterType.LOCAL -> "내 기기에 저장된 파일이 없습니다"
+                    FilterType.SERVER -> "서버에만 저장된 파일이 없습니다"
+                }
+            }
         } else {
             recordingsRecyclerView.visibility = View.VISIBLE
             emptyStateLayout.visibility = View.GONE
