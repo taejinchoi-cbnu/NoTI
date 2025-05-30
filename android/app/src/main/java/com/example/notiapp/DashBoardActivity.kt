@@ -34,7 +34,6 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
-// TODO: server에만 있는 파일 다운로드 가능하게 만들기
 class DashBoardActivity : AppCompatActivity() {
 
     private lateinit var recordingsAdapter: RecordingsAdapter

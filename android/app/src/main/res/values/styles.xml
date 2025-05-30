@@ -118,16 +118,16 @@
         <item name="contentPadding">24dp</item>
     </style>
 
-    <!-- ========== 하단 네비게이션 ========== -->
     <style name="BottomNavigationMinimal" parent="Widget.Design.BottomNavigationView">
-        <item name="android:background">@color/bgColor</item>
+        <item name="android:background">@color/white</item>
         <item name="itemTextAppearanceActive">@style/BottomNavTextActive</item>
         <item name="itemTextAppearanceInactive">@style/BottomNavTextInactive</item>
-        <item name="itemIconTint">@color/mainColor</item>
-        <item name="itemTextColor">@color/mainColor</item>
+        <item name="itemIconTint">@color/bottom_nav_icon_selector</item>
+        <item name="itemTextColor">@color/bottom_nav_text_selector</item>
         <item name="labelVisibilityMode">unlabeled</item>
-        <item name="itemIconSize">32dp</item> <!-- 24dp → 32dp로 증가 -->
+        <item name="itemIconSize">28dp</item>
         <item name="elevation">8dp</item>
+        <item name="itemRippleColor">@color/lightGreen</item>
     </style>
 
     <style name="BottomNavTextActive" parent="TextAppearance.Design.Tab">
