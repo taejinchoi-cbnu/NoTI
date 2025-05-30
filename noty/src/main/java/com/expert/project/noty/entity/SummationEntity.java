@@ -13,13 +13,14 @@ public class SummationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Lob // 대용량 객체로 정의
+    @Column(columnDefinition = "MEDIUMTEXT") // MySQL에서 MEDIUMTEXT로 정의
     private String summation;
 
     @Lob // 대용량 객체로 정의
     @Column(columnDefinition = "MEDIUMTEXT") // MySQL에서 MEDIUMTEXT로 정의
     private String stt;
-
-    private String savedFileName;
 
     private String userId;
     private LocalDateTime uploadDate;

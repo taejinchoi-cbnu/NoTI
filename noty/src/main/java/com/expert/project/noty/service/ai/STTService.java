@@ -28,8 +28,8 @@ public class STTService {
                 .orElseThrow(() -> new ResourceNotFoundException("Audio file not found"));
 
         // 해당 사용자와 오디오 ID에 맞는 Summation 조회
-        SummationEntity summationEntity = summationRepository.findBySavedFileNameAndUserIdAndAudioId(
-                        savedFileName, userId, audioFileEntity.getId())
+        SummationEntity summationEntity = summationRepository.findByUserIdAndAudioId(
+                        userId, audioFileEntity.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Summation not found"));
 
         String result;

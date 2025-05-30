@@ -19,7 +19,7 @@ public class SummationService {
     private final GeminiService geminiService;
     private final SummationRepository summationRepository;
     private final AudioFileRepository audioFileRepository;
-    private final PromptProperties promptProperties;
+//    private final PromptProperties promptProperties;
 
     public SummationService(GeminiService geminiService,
                             SummationRepository summationRepository,
@@ -28,7 +28,7 @@ public class SummationService {
         this.geminiService = geminiService;
         this.summationRepository = summationRepository;
         this.audioFileRepository = audioFileRepository;
-        this.promptProperties = promptProperties;
+//        this.promptProperties = promptProperties;
     }
 
     public SummationResponse processGeminiRequest(String userId, String savedFileName) {
@@ -38,8 +38,8 @@ public class SummationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Audio file not found"));
 
         // 해당 사용자와 오디오 ID에 맞는 Summation 조회
-        SummationEntity summationEntity = summationRepository.findBySavedFileNameAndUserIdAndAudioId(
-                        savedFileName, userId, audioFileEntity.getId())
+        SummationEntity summationEntity = summationRepository.findByUserIdAndAudioId(
+                        userId, audioFileEntity.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Summation not found"));
 
         if (summationEntity.getStt() == null) {
@@ -65,10 +65,17 @@ public class SummationService {
                 "\n";
 
         // 전체 프롬프트 생성
-        String fullPrompt = promptProperties.getDefaultPrompt() + summationEntity.getStt();
+        String defaultPrompot = "[역할] 당신은 회의록 작성 전문가입니다. [맥락] 다음은 팀 회의 녹취록입니다. [지시] 이 회의의 핵심 내용을 요약해 주세요. [목적] 팀원이 결과를 빠르게 공유하고 다음 단계를 준비할 수 있도록 합니다. [형식] * 주요 논의 주제 * 결정된 사항(있다면) * 주요 액션 아이템(담당자 포함) * 기타 주요 의견 * 시간별 순서 * 약속 시간(있다면) [길이] 회의 길이에 비례 [포함/제외] 상세 설명 대신 핵심 아이디어와 결론 중심, 잡담/주제 이탈 내용 제외 [스타일] 명확하고 간결한 비즈니스 스타일로 작성, 텍스트 파일로 봤을 때 잘 정돈된 형태\n내용:";
+        String fullPrompt = defaultPrompot + summationEntity.getStt();
 
         System.out.println("prompt: " + fullPrompt);
 
-        return new SummationResponse(geminiService.callGemini(fullPrompt));
+        String summationResult = geminiService.callGemini(fullPrompt);
+        System.out.println("summation result: " + summationResult);
+
+        summationEntity.setSummation(summationResult);
+        summationRepository.save(summationEntity);
+
+        return new SummationResponse(summationResult);
     }
 }

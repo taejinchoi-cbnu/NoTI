@@ -43,7 +43,7 @@ public class AudioProcessingService {
             // DB 저장
             if (stt != null) {
                 SummationEntity summation = new SummationEntity();
-                summation.setSavedFileName(audioFile.getName());
+//                summation.setSavedFileName(audioFile.getName());
 
                 audioFileEntity.ifPresent(fileEntity -> summation.setAudioId(fileEntity.getId()));
 
