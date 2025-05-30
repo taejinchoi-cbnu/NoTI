@@ -118,6 +118,8 @@
         <item name="contentPadding">24dp</item>
     </style>
 
+    <!-- 하단 네비게이션 스타일 -->
+
     <style name="BottomNavigationMinimal" parent="Widget.Design.BottomNavigationView">
         <item name="android:background">@color/white</item>
         <item name="itemTextAppearanceActive">@style/BottomNavTextActive</item>
@@ -125,7 +127,7 @@
         <item name="itemIconTint">@color/bottom_nav_icon_selector</item>
         <item name="itemTextColor">@color/bottom_nav_text_selector</item>
         <item name="labelVisibilityMode">unlabeled</item>
-        <item name="itemIconSize">28dp</item>
+        <item name="itemIconSize">32dp</item>
         <item name="elevation">8dp</item>
         <item name="itemRippleColor">@color/lightGreen</item>
     </style>
@@ -137,7 +139,7 @@
     </style>
 
     <style name="BottomNavTextInactive" parent="TextAppearance.Design.Tab">
-        <item name="android:textSize">10sp</item>
+        <item name="android:textSize">1sp</item>
         <item name="android:fontFamily">@font/pretendardregular</item>
         <item name="android:textColor">@color/textSecondary</item>
     </style>
