@@ -64,6 +64,7 @@
                 android:id="@+id/recordingAnimationView"
                 android:layout_width="322dp"
                 android:layout_height="250dp"
+                android:src="@drawable/recording_animation"
                 android:scaleType="centerCrop"
                 android:layout_marginBottom="24dp" />
 
@@ -73,7 +74,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:text="녹음 준비"
+                android:text="녹음 대기"
                 style="@style/TextHeading2"
                 android:textColor="@color/textPrimary" />
 
@@ -108,7 +109,7 @@
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp">
+            android:layout_marginBottom="24dp">
 
             <!-- 녹음 시작 버튼 (기본 상태) -->
             <ImageButton

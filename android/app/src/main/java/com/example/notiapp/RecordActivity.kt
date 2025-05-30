@@ -5,12 +5,14 @@ import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.drawable.GradientDrawable
 import android.media.MediaRecorder
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
+import android.view.animation.AnimationUtils
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -19,6 +21,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -65,6 +68,9 @@ class RecordActivity : AppCompatActivity() {
     private lateinit var stopButton: ImageButton
     private lateinit var recordingActiveButtonsLayout: LinearLayout
 
+    // 🔧 녹음 상태 카드 - 테두리 적용 대상
+    private lateinit var recordingStatusCard: CardView
+
     // GIF 애니메이션 뷰
     private lateinit var recordingAnimationView: ImageView
 
@@ -104,11 +110,78 @@ class RecordActivity : AppCompatActivity() {
         stopButton = findViewById(R.id.stopButton)
         recordingActiveButtonsLayout = findViewById(R.id.recordingActiveButtonsLayout)
 
+        // 🔧 상태 카드 초기화 (테두리 적용 대상)
+        recordingStatusCard = findViewById(R.id.recordingStatusCard)
+
         // 애니메이션 뷰 초기화
         recordingAnimationView = findViewById(R.id.recordingAnimationView)
 
         // 초기 상태에서는 숨김 처리
         recordingAnimationView.visibility = View.GONE
+    }
+
+    /**
+     * 🔧 녹음 상태에 따라 카드 테두리를 설정하는 메서드
+     * @param state 현재 녹음 상태
+     */
+    private fun updateCardBorder(state: RecordingState) {
+        val drawable = GradientDrawable().apply {
+            // 기본 배경색 설정 (카드 배경색)
+            setColor(ContextCompat.getColor(this@RecordActivity, R.color.cardBackground))
+
+            when (state) {
+                RecordingState.RECORDING -> {
+                    // 녹음 중일 때: accent color 테두리 2dp 적용
+                    setStroke(
+                        resources.getDimensionPixelSize(R.dimen.recording_border_width), // 2dp
+                        ContextCompat.getColor(this@RecordActivity, R.color.accentGreen)
+                    )
+                }
+                RecordingState.PAUSED -> {
+                    // 일시정지 중일 때: 주황색 테두리 적용
+                    setStroke(
+                        resources.getDimensionPixelSize(R.dimen.recording_border_width), // 2dp
+                        ContextCompat.getColor(this@RecordActivity, R.color.warningOrange)
+                    )
+                }
+                else -> {
+                    // 준비 상태나 완료 상태: 테두리 없음
+                    setStroke(0, 0)
+                }
+            }
+
+            // 둥근 모서리 설정 (카드의 corner radius와 동일하게)
+            cornerRadius = resources.getDimensionPixelSize(R.dimen.button_corner_radius).toFloat()
+        }
+
+        recordingStatusCard.background = drawable
+    }
+
+    /**
+     * 🔧 카드 상태 변화 시 애니메이션을 적용하는 메서드
+     * @param state 변경될 상태
+     */
+    private fun animateCardStateChange(state: RecordingState) {
+        when (state) {
+            RecordingState.RECORDING -> {
+                // 녹음 시작 시: scale_in 애니메이션 적용
+                val scaleInAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_in)
+                recordingStatusCard.startAnimation(scaleInAnimation)
+            }
+            RecordingState.PAUSED -> {
+                // 일시정지 시: fade_out 후 fade_in 효과
+                val fadeAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_in)
+                recordingStatusCard.startAnimation(fadeAnimation)
+            }
+            RecordingState.COMPLETED -> {
+                // 완료 시: fade_out 효과
+                val fadeOutAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_out)
+                recordingStatusCard.startAnimation(fadeOutAnimation)
+            }
+            else -> {
+                // 준비 상태: 특별한 애니메이션 없음
+            }
+        }
     }
 
     private fun setupButtonListeners() {
@@ -304,6 +377,10 @@ class RecordActivity : AppCompatActivity() {
     }
 
     private fun updateUIForRecordingState(state: RecordingState) {
+        // 🔧 상태 변경 시 카드 테두리 및 애니메이션 적용
+        updateCardBorder(state)
+        animateCardStateChange(state)
+
         when (state) {
             RecordingState.READY -> {
                 recordingStatusText.text = "녹음 준비"
@@ -329,8 +406,7 @@ class RecordActivity : AppCompatActivity() {
                 recordingActiveButtonsLayout.visibility = View.VISIBLE
 
                 // 일시정지 버튼 활성화
-                pauseButton.setBackgroundResource(R.drawable.filter_button_inactive)
-                pauseButton.setImageResource(android.R.drawable.ic_media_pause)
+                pauseButton.setImageResource(R.drawable.ic_pause)
                 pauseButton.contentDescription = "일시정지"
 
                 // 🔧 녹음 중 GIF 애니메이션 시작
@@ -347,8 +423,7 @@ class RecordActivity : AppCompatActivity() {
                 recordingHintText.text = "녹음을 계속하거나 종료하세요"
 
                 // 재시작 버튼으로 변경
-                pauseButton.setBackgroundResource(R.drawable.filter_button_active)
-                pauseButton.setImageResource(android.R.drawable.ic_media_play)
+                pauseButton.setImageResource(R.drawable.ic_play)
                 pauseButton.contentDescription = "재시작"
 
                 // 🔧 일시정지 시 애니메이션 정지
