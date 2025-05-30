@@ -10,8 +10,11 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.widget.Button
+import android.view.View
 import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -20,6 +23,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.bumptech.glide.Glide
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
@@ -38,14 +42,35 @@ class RecordActivity : AppCompatActivity() {
     private val TAG = "recordActivity"
     private val RECORD_AUDIO_PERMISSION_CODE = 200
 
+    // 녹음 관련 변수들
     private var mediaRecorder: MediaRecorder? = null
     private var isRecording = false
+    private var isPaused = false
     private var outputFile: String = ""
     private var recordingDuration: Int = 0
     private var startTime: Long = 0
-    private var tempFileName: String = "" // 임시 파일명
+    private var pausedTime: Long = 0
+    private var totalPausedTime: Long = 0
+    private var tempFileName: String = ""
 
-    private lateinit var recordButton: Button
+    // UI 요소들
+    private lateinit var recordingTitleText: TextView
+    private lateinit var recordingStatusText: TextView
+    private lateinit var recordingTimeText: TextView
+    private lateinit var recordingHintText: TextView
+    private lateinit var currentFileNameText: TextView
+
+    private lateinit var recordButton: ImageButton
+    private lateinit var pauseButton: ImageButton
+    private lateinit var stopButton: ImageButton
+    private lateinit var recordingActiveButtonsLayout: LinearLayout
+
+    // GIF 애니메이션 뷰
+    private lateinit var recordingAnimationView: ImageView
+
+    // 시간 업데이트용 핸들러
+    private var timeUpdateHandler: Handler? = null
+    private var timeUpdateRunnable: Runnable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,18 +83,57 @@ class RecordActivity : AppCompatActivity() {
         }
 
         // UI 요소 초기화
-        recordButton = findViewById(R.id.button)
+        initializeViews()
 
-        // 녹음 버튼 클릭 리스너 설정
+        // 버튼 클릭 리스너 설정
+        setupButtonListeners()
+
+        // 초기 UI 상태 설정
+        updateUIForRecordingState(RecordingState.READY)
+    }
+
+    private fun initializeViews() {
+        recordingTitleText = findViewById(R.id.recordingTitleText)
+        recordingStatusText = findViewById(R.id.recordingStatusText)
+        recordingTimeText = findViewById(R.id.recordingTimeText)
+        recordingHintText = findViewById(R.id.recordingHintText)
+        currentFileNameText = findViewById(R.id.currentFileNameText)
+
+        recordButton = findViewById(R.id.recordButton)
+        pauseButton = findViewById(R.id.pauseButton)
+        stopButton = findViewById(R.id.stopButton)
+        recordingActiveButtonsLayout = findViewById(R.id.recordingActiveButtonsLayout)
+
+        // 애니메이션 뷰 초기화
+        recordingAnimationView = findViewById(R.id.recordingAnimationView)
+
+        // 초기 상태에서는 숨김 처리
+        recordingAnimationView.visibility = View.GONE
+    }
+
+    private fun setupButtonListeners() {
+        // 녹음 시작 버튼
         recordButton.setOnClickListener {
             if (checkPermission()) {
-                if (isRecording) {
-                    stopRecording()
-                } else {
-                    startRecording()
-                }
+                startRecording()
             } else {
                 requestPermission()
+            }
+        }
+
+        // 일시정지 버튼
+        pauseButton.setOnClickListener {
+            if (isRecording && !isPaused) {
+                pauseRecording()
+            } else if (isPaused) {
+                resumeRecording()
+            }
+        }
+
+        // 종료 버튼
+        stopButton.setOnClickListener {
+            if (isRecording || isPaused) {
+                stopRecording()
             }
         }
     }
@@ -97,13 +161,14 @@ class RecordActivity : AppCompatActivity() {
                 recordingsDir.mkdirs()
             }
 
-            // 임시 파일명 생성 (녹음 중에는 임시 파일명 사용)
+            // 임시 파일명 생성
             val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
             tempFileName = "TEMP_REC_$timestamp.mp3"
             outputFile = File(recordingsDir, tempFileName).absolutePath
 
             // 녹음 시작 시간 기록
             startTime = System.currentTimeMillis()
+            totalPausedTime = 0
 
             // MediaRecorder 초기화
             mediaRecorder = MediaRecorder().apply {
@@ -115,21 +180,72 @@ class RecordActivity : AppCompatActivity() {
                 start()
             }
 
-            // UI 업데이트
+            // 상태 업데이트
             isRecording = true
-            recordButton.text = "녹음 중지"
-            findViewById<TextView>(R.id.textView4).text = "녹음 중..."
+            isPaused = false
+
+            // UI 업데이트
+            updateUIForRecordingState(RecordingState.RECORDING)
+
+            // 시간 업데이트 시작
+            startTimeUpdate()
+
+            Log.d(TAG, "녹음 시작: $tempFileName")
 
         } catch (e: IOException) {
-            e.printStackTrace()
+            Log.e(TAG, "녹음 시작 실패: ${e.message}", e)
             Toast.makeText(this, "녹음을 시작할 수 없습니다: ${e.message}", Toast.LENGTH_SHORT).show()
+            updateUIForRecordingState(RecordingState.READY)
+        }
+    }
+
+    private fun pauseRecording() {
+        try {
+            mediaRecorder?.pause()
+            isPaused = true
+            pausedTime = System.currentTimeMillis()
+
+            // UI 업데이트
+            updateUIForRecordingState(RecordingState.PAUSED)
+
+            // 시간 업데이트 중지
+            stopTimeUpdate()
+
+            Log.d(TAG, "녹음 일시정지")
+
+        } catch (e: Exception) {
+            Log.e(TAG, "녹음 일시정지 실패: ${e.message}", e)
+            Toast.makeText(this, "일시정지에 실패했습니다", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun resumeRecording() {
+        try {
+            mediaRecorder?.resume()
+            isPaused = false
+
+            // 일시정지된 시간 누적
+            totalPausedTime += System.currentTimeMillis() - pausedTime
+
+            // UI 업데이트
+            updateUIForRecordingState(RecordingState.RECORDING)
+
+            // 시간 업데이트 재시작
+            startTimeUpdate()
+
+            Log.d(TAG, "녹음 재시작")
+
+        } catch (e: Exception) {
+            Log.e(TAG, "녹음 재시작 실패: ${e.message}", e)
+            Toast.makeText(this, "재시작에 실패했습니다", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun stopRecording() {
         try {
             // 녹음 종료 시간 기록 및 기간 계산
-            recordingDuration = ((System.currentTimeMillis() - startTime) / 1000).toInt() // 초 단위
+            val endTime = System.currentTimeMillis()
+            recordingDuration = ((endTime - startTime - totalPausedTime) / 1000).toInt()
 
             mediaRecorder?.apply {
                 stop()
@@ -137,29 +253,134 @@ class RecordActivity : AppCompatActivity() {
                 release()
             }
             mediaRecorder = null
+
+            // 상태 리셋
             isRecording = false
+            isPaused = false
+
+            // 시간 업데이트 중지
+            stopTimeUpdate()
 
             // UI 업데이트
-            recordButton.text = "녹음"
-            findViewById<TextView>(R.id.textView4).text = "녹음이 완료되었습니다"
+            updateUIForRecordingState(RecordingState.COMPLETED)
+
+            Log.d(TAG, "녹음 종료: ${recordingDuration}초")
 
             // 파일명 입력 다이얼로그 표시
             showFileNameInputDialog()
 
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "녹음 종료 실패: ${e.message}", e)
             Toast.makeText(this, "녹음을 중지할 수 없습니다: ${e.message}", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun startTimeUpdate() {
+        timeUpdateHandler = Handler(Looper.getMainLooper())
+        timeUpdateRunnable = object : Runnable {
+            override fun run() {
+                if (isRecording && !isPaused) {
+                    val currentTime = System.currentTimeMillis()
+                    val elapsedTime = ((currentTime - startTime - totalPausedTime) / 1000).toInt()
+                    updateTimeDisplay(elapsedTime)
+                    timeUpdateHandler?.postDelayed(this, 1000) // 1초마다 업데이트
+                }
+            }
+        }
+        timeUpdateHandler?.post(timeUpdateRunnable!!)
+    }
+
+    private fun stopTimeUpdate() {
+        timeUpdateHandler?.removeCallbacks(timeUpdateRunnable!!)
+        timeUpdateHandler = null
+        timeUpdateRunnable = null
+    }
+
+    private fun updateTimeDisplay(seconds: Int) {
+        val minutes = seconds / 60
+        val remainingSeconds = seconds % 60
+        val timeString = String.format("%02d:%02d", minutes, remainingSeconds)
+        recordingTimeText.text = timeString
+    }
+
+    private fun updateUIForRecordingState(state: RecordingState) {
+        when (state) {
+            RecordingState.READY -> {
+                recordingStatusText.text = "녹음 준비"
+                recordingTimeText.text = "00:00"
+                recordingHintText.text = "버튼을 눌러 녹음을 시작하세요"
+                currentFileNameText.visibility = View.GONE
+
+                recordButton.visibility = View.VISIBLE
+                recordingActiveButtonsLayout.visibility = View.GONE
+
+                // 🔧 대기 상태에서는 애니메이션 숨김
+                recordingAnimationView.visibility = View.GONE
+            }
+
+            RecordingState.RECORDING -> {
+                recordingTitleText.text = "녹음 중"
+                recordingStatusText.text = "녹음 중..."
+                recordingHintText.text = "일시정지하거나 녹음을 종료하세요"
+                currentFileNameText.text = "파일명: $tempFileName"
+                currentFileNameText.visibility = View.VISIBLE
+
+                recordButton.visibility = View.GONE
+                recordingActiveButtonsLayout.visibility = View.VISIBLE
+
+                // 일시정지 버튼 활성화
+                pauseButton.setBackgroundResource(R.drawable.filter_button_inactive)
+                pauseButton.setImageResource(android.R.drawable.ic_media_pause)
+                pauseButton.contentDescription = "일시정지"
+
+                // 🔧 녹음 중 GIF 애니메이션 시작
+                recordingAnimationView.visibility = View.VISIBLE
+                Glide.with(this)
+                    .asGif()
+                    .load(R.drawable.recording_animation)
+                    .into(recordingAnimationView)
+            }
+
+            RecordingState.PAUSED -> {
+                recordingTitleText.text = "일시정지"
+                recordingStatusText.text = "일시정지 중"
+                recordingHintText.text = "녹음을 계속하거나 종료하세요"
+
+                // 재시작 버튼으로 변경
+                pauseButton.setBackgroundResource(R.drawable.filter_button_active)
+                pauseButton.setImageResource(android.R.drawable.ic_media_play)
+                pauseButton.contentDescription = "재시작"
+
+                // 🔧 일시정지 시 애니메이션 정지
+                recordingAnimationView.visibility = View.GONE
+            }
+
+            RecordingState.COMPLETED -> {
+                recordingTitleText.text = "녹음 완료"
+                recordingStatusText.text = "녹음이 완료되었습니다"
+                recordingHintText.text = "파일명을 입력해주세요"
+
+                recordButton.visibility = View.VISIBLE
+                recordingActiveButtonsLayout.visibility = View.GONE
+
+                // 🔧 완료 시 애니메이션 숨김
+                recordingAnimationView.visibility = View.GONE
+            }
+        }
+    }
+
+    enum class RecordingState {
+        READY, RECORDING, PAUSED, COMPLETED
     }
 
     private fun showFileNameInputDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_filename_input, null)
         val fileNameEditText = dialogView.findViewById<EditText>(R.id.fileNameEditText)
 
-        // 기본 파일명 제안 (현재 날짜/시간 기반)
-        val defaultName = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date())
+        // 기본 파일명 제안
+        val defaultName = SimpleDateFormat("yyyy-MM-dd HH_mm", Locale.getDefault()).format(Date())
         fileNameEditText.setText("녹음 $defaultName")
-        fileNameEditText.selectAll() // 전체 선택하여 쉽게 수정 가능
+        fileNameEditText.selectAll()
 
         val dialog = AlertDialog.Builder(this)
             .setTitle("파일명 입력")
@@ -171,15 +392,14 @@ class RecordActivity : AppCompatActivity() {
                     processRecordingWithCustomName(userFileName)
                 } else {
                     Toast.makeText(this, "파일명을 입력해주세요.", Toast.LENGTH_SHORT).show()
-                    showFileNameInputDialog() // 다시 다이얼로그 표시
+                    showFileNameInputDialog()
                 }
             }
             .setNegativeButton("취소") { _, _ ->
-                // 취소 시 임시 파일 삭제
                 deleteTempFile()
                 navigateToDashboard()
             }
-            .setCancelable(false) // 뒤로가기로 취소 방지
+            .setCancelable(false)
             .create()
 
         dialog.show()
@@ -201,13 +421,10 @@ class RecordActivity : AppCompatActivity() {
             if (tempFile.renameTo(newFile)) {
                 outputFile = newFile.absolutePath
                 Log.d(TAG, "파일명 변경 성공: ${tempFile.name} -> ${newFile.name}")
-
-                // 서버 업로드 진행
                 uploadRecordingAndNavigate()
             } else {
                 Log.e(TAG, "파일명 변경 실패")
                 Toast.makeText(this, "파일명 변경에 실패했습니다.", Toast.LENGTH_SHORT).show()
-                // 임시 파일명으로 업로드 진행
                 uploadRecordingAndNavigate()
             }
         } catch (e: Exception) {
@@ -236,7 +453,6 @@ class RecordActivity : AppCompatActivity() {
             show()
         }
 
-        // 서버에 녹음 파일 전송
         thread {
             try {
                 val file = File(outputFile)
@@ -256,56 +472,47 @@ class RecordActivity : AppCompatActivity() {
                     return@thread
                 }
 
-                // OkHttp 클라이언트 생성
                 val client = OkHttpClient.Builder()
                     .connectTimeout(60, TimeUnit.SECONDS)
                     .readTimeout(60, TimeUnit.SECONDS)
                     .writeTimeout(60, TimeUnit.SECONDS)
                     .build()
 
-                // AudioUploadRequest에 맞게 MultipartBody 구성
                 val requestBody = MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
                     .addFormDataPart(
                         "file",
-                        file.name, // 사용자가 지정한 파일명 사용
+                        file.name,
                         file.asRequestBody("audio/mpeg".toMediaTypeOrNull())
                     )
                     .addFormDataPart("duration", recordingDuration.toString())
                     .build()
 
-                // 요청 생성 (Authorization 헤더에 JWT 토큰 추가)
                 val request = Request.Builder()
                     .url("http://10.0.2.2:8080/file/upload/audio")
                     .post(requestBody)
                     .header("Authorization", "Bearer $token")
                     .build()
 
-                // 요청 실행
                 client.newCall(request).execute().use { response ->
                     val responseBody = response.body?.string()
                     Log.d(TAG, "서버 응답: ${response.code} - $responseBody")
 
-                    // UI 스레드에서 결과 처리
                     runOnUiThread {
                         progressDialog.dismiss()
 
                         if (response.isSuccessful && responseBody != null) {
-                            // 응답 메시지에서 UUID가 포함된 파일명 추출
                             try {
-                                // "파일 저장 완료: UUID_원본파일명" 형식에서 파일명 추출
                                 val prefix = "파일 저장 완료: "
                                 if (responseBody.startsWith(prefix)) {
                                     val serverSavedFileName = responseBody.substring(prefix.length).trim()
 
-                                    // 로컬 파일명과 서버 저장 파일명 매핑하여 SharedPreferences에 저장
                                     val sharedPreferences = getSharedPreferences("recording_files", MODE_PRIVATE)
                                     val editor = sharedPreferences.edit()
                                     editor.putString(file.name, serverSavedFileName)
                                     editor.apply()
 
                                     Log.d(TAG, "파일명 매핑 저장: ${file.name} -> $serverSavedFileName")
-
                                     Toast.makeText(this, "녹음 파일이 성공적으로 저장되었습니다!\n파일명: ${file.name}", Toast.LENGTH_LONG).show()
                                 } else {
                                     Log.w(TAG, "예상치 못한 응답 형식: $responseBody")
@@ -316,16 +523,12 @@ class RecordActivity : AppCompatActivity() {
                                 Toast.makeText(this, "녹음 파일이 업로드되었지만 처리 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
                             }
 
-                            // 대시보드로 이동
                             navigateToDashboard()
                         } else {
-                            // 서버 오류 처리
                             val errorMessage = when (response.code) {
                                 400 -> "요청 데이터가 올바르지 않습니다."
                                 401, 403 -> {
-                                    // 인증 오류 시 토큰 무효화 및 로그인 화면으로 이동
-                                    clearJwtToken()
-                                    "인증이 만료되었습니다. 다시 로그인해주세요."
+                                    "토큰 에러."
                                 }
                                 500 -> "서버 오류가 발생했습니다. 잠시 후 다시 시도하세요."
                                 else -> "업로드 실패: ${response.code}"
@@ -333,7 +536,6 @@ class RecordActivity : AppCompatActivity() {
 
                             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
 
-                            // 인증 오류인 경우 로그인 화면으로, 그 외의 경우 대시보드로 이동
                             if (response.code == 401 || response.code == 403) {
                                 navigateToLogin()
                             } else {
@@ -345,26 +547,20 @@ class RecordActivity : AppCompatActivity() {
             } catch (e: IOException) {
                 Log.e(TAG, "네트워크 오류: ${e.message}", e)
                 showErrorAndDismissDialog(progressDialog, "서버 연결에 실패했습니다. 인터넷 연결을 확인하세요.")
-
-                // 네트워크 오류 시에도 대시보드로 이동
                 navigateToDashboard()
             } catch (e: Exception) {
                 Log.e(TAG, "예외 발생: ${e.message}", e)
                 showErrorAndDismissDialog(progressDialog, "오류가 발생했습니다: ${e.message}")
-
-                // 예외 발생 시에도 대시보드로 이동
                 navigateToDashboard()
             }
         }
     }
 
-    // JWT 토큰 가져오기
     private fun getJwtToken(): String {
         val sharedPreferences = getSharedPreferences("auth_prefs", MODE_PRIVATE)
         return sharedPreferences.getString("jwt_token", "") ?: ""
     }
 
-    // JWT 토큰 삭제
     private fun clearJwtToken() {
         val sharedPreferences = getSharedPreferences("auth_prefs", MODE_PRIVATE)
         sharedPreferences.edit().remove("jwt_token").apply()
@@ -412,9 +608,15 @@ class RecordActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        // 활동이 중지될 때 녹음 중이면 중지
+        // 액티비티가 중지될 때 녹음 중이면 중지
         if (isRecording) {
             stopRecording()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // 시간 업데이트 핸들러 정리
+        stopTimeUpdate()
     }
 }

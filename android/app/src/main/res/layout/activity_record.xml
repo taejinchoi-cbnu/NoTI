@@ -8,39 +8,206 @@
     android:background="@color/white"
     tools:context=".RecordActivity">
 
-    <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+    <!-- ========== 상단 Header 섹션 ========== -->
+    <LinearLayout
+        android:id="@+id/headerLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/newlogo" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
+        <!-- 로고와 앱 이름 -->
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="12dp"
+            android:scaleType="centerCrop"
+            app:srcCompat="@drawable/newlogo" />
+
+        <TextView
+            android:id="@+id/recordingTitleText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="새 녹음"
+            style="@style/TextHeading1" />
+
+    </LinearLayout>
+
+    <!-- ========== 녹음 상태 카드 ========== -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/recordingStatusCard"
+        style="@style/CardMinimalLarge"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="녹음"
-        android:fontFamily="@font/pretendardregular"
-        android:background="@color/mainColor"
-        android:textColor="@android:color/white"
+        android:layout_marginTop="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout"
+        app:layout_constraintWidth_percent="0.9">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="32dp">
+
+            <!-- 🔧 GIF 애니메이션 ImageView -->
+            <ImageView
+                android:id="@+id/recordingAnimationView"
+                android:layout_width="322dp"
+                android:layout_height="250dp"
+                android:scaleType="centerCrop"
+                android:layout_marginBottom="24dp" />
+
+            <!-- 녹음 상태 텍스트 -->
+            <TextView
+                android:id="@+id/recordingStatusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="녹음 준비"
+                style="@style/TextHeading2"
+                android:textColor="@color/textPrimary" />
+
+            <!-- 녹음 시간 표시 -->
+            <TextView
+                android:id="@+id/recordingTimeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="00:00"
+                style="@style/TextBody1"
+                android:textColor="@color/textSecondary"
+                android:textSize="24sp"
+                android:fontFamily="@font/pretendardbold" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- ========== 녹음 제어 영역 ========== -->
+    <LinearLayout
+        android:id="@+id/recordingControlsLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/recordingStatusCard"
+        app:layout_constraintWidth_percent="0.8">
+
+        <!-- 🔧 통일된 버튼 컨테이너 (고정 위치) -->
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp">
+
+            <!-- 녹음 시작 버튼 (기본 상태) -->
+            <ImageButton
+                android:id="@+id/recordButton"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_gravity="center"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_recording"
+                android:scaleType="centerInside"
+                android:padding="0dp"
+                android:elevation="6dp"
+                android:contentDescription="녹음 시작" />
+
+            <!-- 녹음 중 버튼들 (녹음 중일 때만 표시) -->
+            <LinearLayout
+                android:id="@+id/recordingActiveButtonsLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:visibility="gone">
+
+                <!-- 일시정지 버튼 -->
+                <ImageButton
+                    android:id="@+id/pauseButton"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:layout_marginEnd="32dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_pause"
+                    android:scaleType="centerInside"
+                    android:padding="0dp"
+                    android:elevation="6dp"
+                    android:contentDescription="일시정지" />
+
+                <!-- 종료 버튼 -->
+                <ImageButton
+                    android:id="@+id/stopButton"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_stop"
+                    android:scaleType="centerInside"
+                    android:padding="0dp"
+                    android:elevation="6dp"
+                    android:contentDescription="녹음 종료" />
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+        <!-- 녹음 안내 텍스트 -->
+        <TextView
+            android:id="@+id/recordingHintText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="버튼을 눌러 녹음을 시작하세요"
+            style="@style/TextBody2"
+            android:textAlignment="center"
+            android:lineSpacingExtra="4dp" />
+
+    </LinearLayout>
+
+    <!-- ========== 하단 추가 정보 ========== -->
+    <LinearLayout
+        android:id="@+id/recordingInfoLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:gravity="center"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView4"
-        app:layout_constraintVertical_bias="0.2" />
+        app:layout_constraintWidth_percent="0.9">
 
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="녹음 애니메이션"
-        android:fontFamily="@font/pretendardregular"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <!-- 현재 파일명 표시 (녹음 중일 때) -->
+        <TextView
+            android:id="@+id/currentFileNameText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text=""
+            style="@style/TextBody2"
+            android:textColor="@color/textTertiary"
+            android:visibility="gone" />
+
+        <!-- 녹음 팁 -->
+        <TextView
+            android:id="@+id/recordingTipText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="조용한 환경에서 녹음하면 더 좋은 결과를 얻을 수 있습니다"
+            style="@style/TextCaption"
+            android:textAlignment="center"
+            android:alpha="0.7" />
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
