@@ -39,13 +39,13 @@
 
     </LinearLayout>
 
-    <!-- ========== 파일 정보 카드 ========== -->
+    <!-- ========== 파일 정보 카드 (크기 줄임) ========== -->
     <androidx.cardview.widget.CardView
         android:id="@+id/fileInfoCard"
-        style="@style/CardMinimalLarge"
+        style="@style/CardMinimal"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/headerLayout"
@@ -56,18 +56,17 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="20dp">
+            android:padding="12dp">
 
-            <!-- 파일 아이콘 -->
+            <!-- 파일 아이콘 (크기 축소) -->
             <ImageView
                 android:id="@+id/fileIcon"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_marginEnd="16dp"
-                android:background="@drawable/filter_button_inactive"
-                android:padding="12dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginEnd="12dp"
+                android:alpha="0.7"
                 android:scaleType="centerInside"
-                android:src="@android:drawable/ic_menu_agenda" />
+                android:src="@drawable/ic_recording" />
 
             <!-- 파일 정보 -->
             <LinearLayout
@@ -81,207 +80,293 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="녹음 파일명.mp3"
-                    style="@style/TextBody1"
-                    android:textColor="@color/textPrimary" />
+                    style="@style/TextBody2"
+                    android:textColor="@color/textPrimary"
+                    android:ellipsize="end"
+                    android:maxLines="1" />
 
                 <TextView
                     android:id="@+id/fileInfoText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="2025-05-01 | 02:30 | 1.2MB"
-                    style="@style/TextBody2" />
+                    android:text="2025-05-01 | 02:30"
+                    style="@style/TextCaption" />
 
             </LinearLayout>
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- ========== 기능 버튼들 ========== -->
+    <!-- ========== 탭 버튼들 (스크립트/요약본) ========== -->
     <LinearLayout
-        android:id="@+id/actionButtonsLayout"
+        android:id="@+id/tabButtonsLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:orientation="vertical"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal"
+        android:gravity="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/fileInfoCard"
         app:layout_constraintWidth_percent="0.9">
 
-        <!-- 스크립트 생성 버튼 -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/scriptButton"
-            style="@style/CardMinimal"
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/scriptTabButton"
+            style="@style/FilterButtonActive"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"
-            app:cardBackgroundColor="@color/cardBlue">
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="스크립트 생성" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="20dp">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
-                    android:src="@android:drawable/ic_menu_edit"
-                    android:alpha="0.7" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="스크립트 생성"
-                    style="@style/TextBody1"
-                    android:textColor="@color/textPrimary" />
-
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:src="@android:drawable/ic_menu_more"
-                    android:alpha="0.5" />
-
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- 요약본 생성 버튼 -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/summaryButton"
-            style="@style/CardMinimal"
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/summaryTabButton"
+            style="@style/FilterButtonInactive"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"
-            app:cardBackgroundColor="@color/cardOrange">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="20dp">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
-                    android:src="@android:drawable/ic_menu_info_details"
-                    android:alpha="0.7" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="요약본 생성"
-                    style="@style/TextBody1"
-                    android:textColor="@color/textPrimary" />
-
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:src="@android:drawable/ic_menu_more"
-                    android:alpha="0.5" />
-
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- 파일 다운로드 버튼 (서버 파일인 경우만 표시) -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/downloadButton"
-            style="@style/CardMinimal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"
-            android:visibility="gone"
-            app:cardBackgroundColor="@color/cardPurple">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="20dp">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
-                    android:src="@android:drawable/stat_sys_download"
-                    android:alpha="0.7" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="파일 다운로드"
-                    style="@style/TextBody1"
-                    android:textColor="@color/textPrimary" />
-
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:src="@android:drawable/ic_menu_more"
-                    android:alpha="0.5" />
-
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- 재생 버튼 -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/playButton"
-            style="@style/CardMinimal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"
-            app:cardBackgroundColor="@color/cardYellow">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="20dp">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
-                    android:src="@android:drawable/ic_media_play"
-                    android:alpha="0.7" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="녹음 파일 재생"
-                    style="@style/TextBody1"
-                    android:textColor="@color/textPrimary" />
-
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:src="@android:drawable/ic_menu_more"
-                    android:alpha="0.5" />
-
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+            android:layout_weight="1"
+            android:text="요약본 생성" />
 
     </LinearLayout>
+
+    <!-- ========== 컨텐츠 뷰어 영역 ========== -->
+    <FrameLayout
+        android:id="@+id/contentViewerLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@id/audioPlayerBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tabButtonsLayout"
+        app:layout_constraintWidth_percent="0.9">
+
+        <!-- 스크립트 뷰 -->
+        <LinearLayout
+            android:id="@+id/scriptContentLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <!-- 스크립트 헤더 (복사 버튼 포함) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="스크립트"
+                    style="@style/TextBody1" />
+
+                <ImageButton
+                    android:id="@+id/copyScriptButton"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/ic_menu_save"
+                    android:contentDescription="복사"
+                    android:alpha="0.7" />
+
+            </LinearLayout>
+
+            <!-- 로딩 표시 -->
+            <ProgressBar
+                android:id="@+id/scriptLoadingProgress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="48dp"
+                android:visibility="visible" />
+
+            <!-- 스크립트 내용 -->
+            <ScrollView
+                android:id="@+id/scriptScrollView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/scriptTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:text=""
+                    style="@style/TextBody1"
+                    android:lineSpacingExtra="4dp" />
+
+            </ScrollView>
+
+        </LinearLayout>
+
+        <!-- 요약본 뷰 -->
+        <LinearLayout
+            android:id="@+id/summaryContentLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <!-- 요약본 헤더 (복사 버튼 포함) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="AI 요약본"
+                    style="@style/TextBody1" />
+
+                <ImageButton
+                    android:id="@+id/copySummaryButton"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/ic_menu_save"
+                    android:contentDescription="복사"
+                    android:alpha="0.7" />
+
+            </LinearLayout>
+
+            <!-- 로딩 표시 -->
+            <ProgressBar
+                android:id="@+id/summaryLoadingProgress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="48dp"
+                android:visibility="gone" />
+
+            <!-- 요약본 내용 -->
+            <ScrollView
+                android:id="@+id/summaryScrollView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="visible">
+
+                <TextView
+                    android:id="@+id/summaryTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:text=""
+                    style="@style/TextBody1"
+                    android:lineSpacingExtra="4dp" />
+
+            </ScrollView>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <!-- ========== 오디오 플레이어 바 ========== -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/audioPlayerBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="0dp"
+        app:cardElevation="8dp"
+        app:cardCornerRadius="0dp"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:background="@color/white">
+
+            <!-- 시크바 -->
+            <SeekBar
+                android:id="@+id/audioSeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:progressTint="@color/mainColor"
+                android:thumbTint="@color/mainColor" />
+
+            <!-- 시간 표시 및 컨트롤 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="4dp">
+
+                <!-- 현재 시간 -->
+                <TextView
+                    android:id="@+id/currentTimeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="00:00"
+                    style="@style/TextCaption" />
+
+                <!-- 중앙 컨트롤 버튼들 -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <!-- 15초 뒤로 -->
+                    <ImageButton
+                        android:id="@+id/rewind15Button"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@android:drawable/ic_media_rew"
+                        android:contentDescription="15초 뒤로"
+                        android:alpha="0.7" />
+
+                    <!-- 재생/일시정지 -->
+                    <ImageButton
+                        android:id="@+id/playPauseButton"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_marginHorizontal="16dp"
+                        android:background="@drawable/ic_play"
+                        android:contentDescription="재생"
+                        android:src="@android:drawable/ic_media_play"
+                        android:tint="@color/white" />
+
+                    <!-- 15초 앞으로 -->
+                    <ImageButton
+                        android:id="@+id/forward15Button"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@android:drawable/ic_media_ff"
+                        android:contentDescription="15초 앞으로"
+                        android:alpha="0.7" />
+
+                </LinearLayout>
+
+                <!-- 전체 시간 -->
+                <TextView
+                    android:id="@+id/totalTimeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="00:00"
+                    style="@style/TextCaption" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
 
     <!-- 하단 네비게이션 -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
