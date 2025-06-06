@@ -2,7 +2,7 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/recordingCardView"
-    style="@style/CardMinimal"
+    style="@style/RecCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
@@ -18,7 +18,8 @@
         android:id="@+id/recordingItemContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:padding="15dp"
+        >
 
         <!-- 채팅 상태 아이콘 -->
         <ImageView
@@ -38,12 +39,12 @@
             style="@style/TextBody1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="12dp"
+            android:layout_marginStart="12dp"
             android:ellipsize="middle"
             android:singleLine="true"
             android:text="녹음 파일명.mp3"
             android:textSize="18sp"
-            app:layout_constraintEnd_toStartOf="@+id/arrowIcon"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/chatStatusIcon"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -53,23 +54,12 @@
             style="@style/TextBody2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
             android:layout_marginTop="4dp"
-            android:layout_marginEnd="12dp"
             android:text="2025-05-01 | 00:30"
-            app:layout_constraintEnd_toStartOf="@+id/arrowIcon"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/chatStatusIcon"
             app:layout_constraintTop_toBottomOf="@+id/recordingFileName" />
-
-        <!-- 화살표 아이콘 -->
-        <ImageView
-            android:id="@+id/arrowIcon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@android:drawable/ic_menu_send"
-            android:alpha="0.5"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

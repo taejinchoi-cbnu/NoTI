@@ -11,7 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 
 class ChatFileAdapter(
     private var recordings: MutableList<RecordingItem>,
-    private val onFileClickListener: (RecordingItem) -> Unit
+    private val onFileClickListener: (RecordingItem) -> Unit,
+    private val sessionManager: ChatSessionManager
 ) : RecyclerView.Adapter<ChatFileAdapter.ChatFileViewHolder>() {
 
     inner class ChatFileViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -34,9 +35,16 @@ class ChatFileAdapter(
         holder.filenameTextView.text = recording.filename
         holder.infoTextView.text = "${recording.date} | ${recording.duration}"
 
-        // 채팅 상태 아이콘 설정 (나중에 구현)
-        // TODO: 기존 채팅 세션이 있는지 확인해서 아이콘 변경
-        holder.chatStatusIcon.setImageResource(R.drawable.ic_recording)
+        // 채팅 상태 아이콘 설정
+        if (sessionManager.hasSession(recording.savedFileName)) {
+            // 기존 세션이 있는 경우 - 채팅 아이콘으로 변경
+            holder.chatStatusIcon.setImageResource(android.R.drawable.ic_menu_send)
+            holder.chatStatusIcon.alpha = 1.0f
+        } else {
+            // 새로운 파일 - 기본 녹음 아이콘
+            holder.chatStatusIcon.setImageResource(R.drawable.ic_recording)
+            holder.chatStatusIcon.alpha = 0.7f
+        }
 
         // 클릭 리스너
         holder.itemContainer.setOnClickListener {

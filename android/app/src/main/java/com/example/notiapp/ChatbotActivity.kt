@@ -71,6 +71,7 @@ class ChatbotActivity : AppCompatActivity() {
         CHATTING       // 채팅 중
     }
     private var currentState = ScreenState.FILE_LIST
+    private lateinit var sessionManager: ChatSessionManager
 
     // HTTP 클라이언트
     private val client = OkHttpClient.Builder()
@@ -92,6 +93,7 @@ class ChatbotActivity : AppCompatActivity() {
 
         // UI 요소 초기화
         initializeViews()
+        sessionManager = ChatSessionManager(this)
 
         // 어댑터 설정
         setupAdapters()
@@ -103,7 +105,7 @@ class ChatbotActivity : AppCompatActivity() {
         setupBottomNavigation()
 
         // 파일 목록 로드
-        loadRecordingFiles()
+        loadRecordingFiles() // Removed the undefined 'file' parameter
     }
 
     private fun initializeViews() {
@@ -135,9 +137,10 @@ class ChatbotActivity : AppCompatActivity() {
 
     private fun setupAdapters() {
         // 파일 목록 어댑터
-        chatFileAdapter = ChatFileAdapter(allRecordings) { recordingItem ->
+        chatFileAdapter = ChatFileAdapter(allRecordings, { recordingItem ->
             onFileSelected(recordingItem)
-        }
+        }, sessionManager) // sessionManager 전달
+
         chatFileRecyclerView.layoutManager = LinearLayoutManager(this)
         chatFileRecyclerView.adapter = chatFileAdapter
 
@@ -160,7 +163,7 @@ class ChatbotActivity : AppCompatActivity() {
                     showFileListScreen()
                 }
                 else -> {
-                    // 파일 목록에서는 뒤로가기 없음
+                    // 파일 목록에서는 뒤로가기 없음 (handled by onBackPressed)
                 }
             }
         }
@@ -263,8 +266,7 @@ class ChatbotActivity : AppCompatActivity() {
 
     // ========== 데이터 로딩 메서드들 ==========
 
-    private fun loadRecordingFiles() {
-        // 서버에서 파일 목록 가져오기 (기존 DashboardActivity 로직 재사용)
+    private fun loadRecordingFiles() { // No parameter needed here
         val token = getJwtToken()
         if (token.isEmpty()) {
             Log.w(TAG, "JWT 토큰이 없어 파일을 가져올 수 없습니다")
@@ -382,50 +384,62 @@ class ChatbotActivity : AppCompatActivity() {
     private fun onFileSelected(recordingItem: RecordingItem) {
         Log.d(TAG, "파일 선택됨: ${recordingItem.filename}")
 
-        // 바로 세션 준비 화면으로 이동 (기존 세션 확인 로직 제거)
-        showSessionSetupScreen(recordingItem)
-    }
+        // 기존 세션이 있는지 확인
+        val existingSessionId = sessionManager.getSessionId(recordingItem.savedFileName)
 
-
-    private fun checkExistingChatSession(recordingItem: RecordingItem, callback: (Boolean, Long?) -> Unit) {
-        val token = getJwtToken()
-        if (token.isEmpty()) {
-            callback(false, null)
-            return
-        }
-
-        thread {
-            try {
-                // TODO: API만들어주면 수정하기 - 기존 세션 확인 API
-                val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/chatbot/check-session?fileName=${recordingItem.savedFileName}")
-                    .header("Authorization", "Bearer $token")
-                    .build()
-
-                client.newCall(request).execute().use { response ->
-                    val responseBody = response.body?.string()
-
-                    if (response.isSuccessful && responseBody != null) {
-                        try {
-                            val jsonResponse = JSONObject(responseBody)
-                            val hasSession = jsonResponse.getBoolean("hasSession")
-                            val sessionId = if (hasSession) jsonResponse.getLong("sessionId") else null
-
-                            callback(hasSession, sessionId)
-                        } catch (e: Exception) {
-                            Log.e(TAG, "세션 확인 응답 파싱 오류: ${e.message}", e)
-                            callback(false, null)
-                        }
-                    } else {
-                        callback(false, null)
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "세션 확인 오류: ${e.message}", e)
-                callback(false, null)
+        if (existingSessionId != null) {
+            Log.d(TAG, "기존 세션 발견: $existingSessionId")
+            // 바로 채팅 화면으로 이동
+            loadChatHistory(existingSessionId) {
+                showChatScreen(recordingItem, existingSessionId)
             }
+        } else {
+            Log.d(TAG, "새로운 세션 필요")
+            // 세션 준비 화면으로 이동
+            showSessionSetupScreen(recordingItem)
         }
     }
+
+    // This method is unused and can be removed if not required
+    // private fun checkExistingChatSession(recordingItem: RecordingItem, callback: (Boolean, Long?) -> Unit) {
+    //     val token = getJwtToken()
+    //     if (token.isEmpty()) {
+    //         callback(false, null)
+    //         return
+    //     }
+    //
+    //     thread {
+    //         try {
+    //             // TODO: API만들어주면 수정하기 - 기존 세션 확인 API
+    //             val request = Request.Builder()
+    //                 .url("http://10.0.2.2:8080/chatbot/check-session?fileName=${recordingItem.savedFileName}")
+    //                 .header("Authorization", "Bearer $token")
+    //                 .build()
+    //
+    //             client.newCall(request).execute().use { response ->
+    //                 val responseBody = response.body?.string()
+    //
+    //                 if (response.isSuccessful && responseBody != null) {
+    //                     try {
+    //                         val jsonResponse = JSONObject(responseBody)
+    //                         val hasSession = jsonResponse.getBoolean("hasSession")
+    //                         val sessionId = if (hasSession) jsonResponse.getLong("sessionId") else null
+    //
+    //                         callback(hasSession, sessionId)
+    //                     } catch (e: Exception) {
+    //                         Log.e(TAG, "세션 확인 응답 파싱 오류: ${e.message}", e)
+    //                         callback(false, null)
+    //                     }
+    //                 } else {
+    //                     callback(false, null)
+    //                 }
+    //             }
+    //         } catch (e: Exception) {
+    //             Log.e(TAG, "세션 확인 오류: ${e.message}", e)
+    //             callback(false, null)
+    //         }
+    //     }
+    // }
 
     private fun createChatbotSession(recordingItem: RecordingItem) {
         // 로딩 상태 표시
@@ -460,8 +474,11 @@ class ChatbotActivity : AppCompatActivity() {
                         if (response.isSuccessful && responseBody != null) {
                             try {
                                 val jsonResponse = JSONObject(responseBody)
-                                val sessionId = jsonResponse.getLong("sessionId") // Long으로 파싱
+                                val sessionId = jsonResponse.getLong("sessionId")
                                 val status = jsonResponse.getString("sessionStatus")
+
+                                // ✅ 세션 ID 저장
+                                sessionManager.saveSession(recordingItem.savedFileName, sessionId)
 
                                 when (status) {
                                     "READY" -> {
@@ -495,6 +512,7 @@ class ChatbotActivity : AppCompatActivity() {
             }
         }
     }
+
 
     private fun checkSessionStatus(sessionId: Long, recordingItem: RecordingItem) {
         val handler = Handler(Looper.getMainLooper())
@@ -606,7 +624,7 @@ class ChatbotActivity : AppCompatActivity() {
 
             for (i in 0 until jsonArray.length()) {
                 val jsonObject = jsonArray.getJSONObject(i)
-                val id = jsonObject.getInt("id")
+                // val id = jsonObject.getInt("id") // 'id' might not be needed for display
                 val question = jsonObject.getString("question") // question 필드명
                 val isUser = jsonObject.getBoolean("isUser") // isUser 필드명
                 val timestamp = jsonObject.getString("timestamp")
