@@ -28,6 +28,9 @@ import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
+// Markwon 라이브러리 import
+import io.noties.markwon.Markwon
+import io.noties.markwon.linkify.LinkifyPlugin
 
 class RecordingDetailActivity : AppCompatActivity() {
 
@@ -97,6 +100,9 @@ class RecordingDetailActivity : AppCompatActivity() {
     private var scriptData: String = ""
     private var summaryData: String = ""
 
+    // Markwon 인스턴스 (마크다운 렌더링용)
+    private lateinit var markwon: Markwon
+
     override fun onCreate(savedInstanceState: Bundle?) {
         try {
             super.onCreate(savedInstanceState)
@@ -109,6 +115,9 @@ class RecordingDetailActivity : AppCompatActivity() {
                 v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
                 insets
             }
+
+            // Markwon 초기화 (마크다운 렌더링 라이브러리)
+            initializeMarkwon()
 
             // UI 요소 초기화
             initializeViews()
@@ -140,6 +149,18 @@ class RecordingDetailActivity : AppCompatActivity() {
             Toast.makeText(this, "오류가 발생했습니다: ${e.message}", Toast.LENGTH_LONG).show()
             finish()
         }
+    }
+
+    /**
+     * Markwon 라이브러리 초기화
+     * 마크다운 텍스트를 Android TextView에서 렌더링할 수 있도록 설정
+     */
+    private fun initializeMarkwon() {
+        markwon = Markwon.builder(this)
+            .usePlugin(LinkifyPlugin.create()) // 링크 자동 감지 플러그인
+            .build()
+
+        Log.d(TAG, "Markwon 라이브러리 초기화 완료")
     }
 
     private fun initializeViews() {
@@ -450,17 +471,18 @@ class RecordingDetailActivity : AppCompatActivity() {
         scriptTextView.text = script
     }
 
+    /**
+     * Markwon 라이브러리를 사용하여 마크다운 텍스트를 렌더링
+     * @param summary 마크다운 형식의 요약 텍스트
+     */
     private fun displaySummary(summary: String) {
         summaryLoadingProgress.visibility = View.GONE
         summaryScrollView.visibility = View.VISIBLE
 
-        // Markdown 처리를 위한 간단한 변환
-        val formattedSummary = summary
-            .replace("**", "") // 볼드 제거
-            .replace("##", "▶") // 헤딩을 화살표로
-            .replace("- ", "• ") // 리스트 아이템
+        // Markwon 라이브러리로 마크다운을 실제 스타일이 적용된 텍스트로 렌더링
+        markwon.setMarkdown(summaryTextView, summary)
 
-        summaryTextView.text = formattedSummary
+        Log.d(TAG, "마크다운 요약본 렌더링 완료")
     }
 
     private fun showScriptError(message: String) {
