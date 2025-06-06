@@ -34,7 +34,7 @@ public class STTController {
         try {
             String userId = userDetails.getUsername();
 
-            STTResponse response = sttService.getSummationBySavedFileName(savedFileName, userId);
+            STTResponse response = sttService.getSTTBySavedFileName(savedFileName, userId);
 
             System.out.println("/ai/stt is successful");
 
