@@ -31,25 +31,284 @@
             app:srcCompat="@drawable/newlogo" />
 
         <TextView
+            android:id="@+id/chatTitleText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="챗봇"
+            android:text="AI 비서"
             style="@style/TextHeading1" />
+
+        <!-- 뒤로가기 버튼 (채팅 화면에서만 표시) -->
+        <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_revert"
+            android:contentDescription="뒤로가기"
+            android:visibility="gone" />
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="나만의 비서 페이지"
-        android:fontFamily="@font/pretendardbold"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <!-- ========== 1. 파일 목록 화면 ========== -->
+    <LinearLayout
+        android:id="@+id/fileListLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/headerLayout">
+
+        <!-- 파일 목록 제목 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp"
+            android:text="대화할 녹음 파일을 선택하세요"
+            android:fontFamily="@font/pretendardbold"
+            android:textSize="18sp"
+            android:textColor="@color/textPrimary" />
+
+        <!-- 파일 개수 표시 -->
+        <TextView
+            android:id="@+id/chatFileCountText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="8dp"
+            android:text="총 0개 파일"
+            android:fontFamily="@font/pretendardregular"
+            android:textSize="14sp"
+            android:textColor="@color/textSecondary"
+            android:alpha="0.7" />
+
+        <!-- 구분선 -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="8dp"
+            android:background="@color/black"
+            android:alpha="0.1" />
+
+        <!-- 파일 목록 -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/chatFileRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingTop="8dp"
+            android:paddingBottom="80dp"
+            android:scrollbars="none" />
+
+        <!-- 파일이 없을 때 표시할 메시지 -->
+        <LinearLayout
+            android:id="@+id/chatEmptyStateLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_marginBottom="16dp"
+                android:alpha="0.3"
+                android:src="@android:drawable/ic_menu_agenda" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="녹음 파일이 없습니다"
+                android:fontFamily="@font/pretendardregular"
+                android:textSize="16sp"
+                android:textColor="@color/textSecondary"
+                android:alpha="0.5" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="먼저 녹음을 하고 오세요!"
+                android:fontFamily="@font/pretendardregular"
+                android:textSize="14sp"
+                android:textColor="@color/textSecondary"
+                android:alpha="0.4" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- ========== 2. 세션 준비 화면 ========== -->
+    <LinearLayout
+        android:id="@+id/sessionSetupLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout">
+
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginBottom="24dp"
+            android:alpha="0.7"
+            android:src="@drawable/newlogo" />
+
+        <TextView
+            android:id="@+id/selectedFileNameText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="선택된 파일명"
+            android:fontFamily="@font/pretendardbold"
+            android:textSize="16sp"
+            android:textColor="@color/textPrimary" />
+
+        <TextView
+            android:id="@+id/setupStatusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="이 녹음 파일로\nAI 비서를 생성하시겠어요?"
+            android:textAlignment="center"
+            android:fontFamily="@font/pretendardbold"
+            android:textSize="18sp"
+            android:textColor="@color/textPrimary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="녹음 내용을 분석해서 맞춤형 AI 비서를 준비해드려요"
+            android:textAlignment="center"
+            android:fontFamily="@font/pretendardregular"
+            android:textSize="14sp"
+            android:textColor="@color/textSecondary" />
+
+        <Button
+            android:id="@+id/createChatbotButton"
+            style="@style/ButtonMinimalPrimary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="AI 비서 생성하기" />
+
+        <ProgressBar
+            android:id="@+id/sessionLoadingProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/loadingStatusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="녹음 내용을 분석하고 있습니다..."
+            android:textAlignment="center"
+            android:fontFamily="@font/pretendardregular"
+            android:textSize="14sp"
+            android:textColor="@color/textSecondary"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <!-- ========== 3. 채팅 화면 ========== -->
+    <LinearLayout
+        android:id="@+id/chatLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout">
+
+        <!-- 현재 대화 중인 파일 정보 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/bgColor"
+            android:padding="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/ic_recording"
+                android:alpha="0.7" />
+
+            <TextView
+                android:id="@+id/currentChatFileNameText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="현재 대화 중인 파일"
+                android:fontFamily="@font/pretendardregular"
+                android:textSize="14sp"
+                android:textColor="@color/textSecondary" />
+
+        </LinearLayout>
+
+        <!-- 채팅 메시지 리스트 -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/chatRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:scrollbars="none" />
+
+        <!-- 메시지 입력 영역 -->
+        <LinearLayout
+            android:id="@+id/inputLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/messageEditText"
+                style="@style/EditTextMinimal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="메시지를 입력하세요..."
+                android:inputType="textMultiLine"
+                android:maxLines="4" />
+
+            <ImageButton
+                android:id="@+id/sendButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/ic_play"
+                android:contentDescription="전송"
+                android:src="@android:drawable/ic_menu_send" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
     <!-- 하단 네비게이션 -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
