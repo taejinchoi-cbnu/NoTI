@@ -20,26 +20,31 @@ public class AudioProcessingService {
     private final WhisperService whisperService;
     private final SummationRepository summationRepository;
     private final AudioFileRepository audioFileRepository;
+    private final VitoService vitoService;
 
     public AudioProcessingService(WhisperService whisperService,
                                   SummationRepository summationRepository,
-                                  AudioFileRepository audioFileRepository) {
+                                  AudioFileRepository audioFileRepository,
+                                  VitoService vitoService) {
 
         this.whisperService = whisperService;
         this.summationRepository = summationRepository;
         this.audioFileRepository = audioFileRepository;
+        this.vitoService = vitoService;
     }
 
     @Async
     public void processAudioAsync(File audioFile, String username) {
         try {
             // AI 처리 로직 (예: Whisper API 호출)
-            String stt = whisperService.transcribe(audioFile).join();
+//            String stt = whisperService.transcribe(audioFile).join();
+
+            String stt = vitoService.getScriptResult(audioFile);
 
             Optional<AudioFileEntity> audioFileEntity = audioFileRepository.findBySavedName(audioFile.getName());
 
             // 결과 저장 또는 후속 작업
-            System.out.println("요약 결과: " + stt);
+            System.out.println("stt: " + stt);
             // DB 저장
             if (stt != null) {
                 SummationEntity summation = new SummationEntity();
