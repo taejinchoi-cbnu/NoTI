@@ -11,7 +11,9 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.ProgressBar
@@ -31,6 +33,7 @@ data class UserInfo(
 class UserInfoActivity : AppCompatActivity() {
 
     private val TAG = "UserInfoActivity"
+    val serverIp = AddressAdmin.MY_SERVER_IP
 
     private lateinit var logoutButton: Button
     private lateinit var userIdText: TextView
@@ -53,6 +56,13 @@ class UserInfoActivity : AppCompatActivity() {
         .readTimeout(15, TimeUnit.SECONDS)
         .writeTimeout(15, TimeUnit.SECONDS)
         .build()
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        val imm: InputMethodManager =
+            getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
+        return super.dispatchTouchEvent(ev)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -177,7 +187,7 @@ class UserInfoActivity : AppCompatActivity() {
                 val requestBody = FormBody.Builder().build()
 
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/auth/get/user-information")
+                    .url("http://${serverIp}/auth/get/user-information")
                     .post(requestBody)
                     .header("Authorization", "Bearer $token")
                     .build()
@@ -389,7 +399,7 @@ class UserInfoActivity : AppCompatActivity() {
                     .build()
 
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/auth/update/user-information")
+                    .url("http://${serverIp}/auth/update/user-information")
                     .post(requestBody)
                     .header("Authorization", "Bearer $token")
                     .build()

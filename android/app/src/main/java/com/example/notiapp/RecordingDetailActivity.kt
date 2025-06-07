@@ -35,6 +35,7 @@ import io.noties.markwon.linkify.LinkifyPlugin
 class RecordingDetailActivity : AppCompatActivity() {
 
     private val TAG = "RecordingDetailActivity"
+    val serverIp = AddressAdmin.MY_SERVER_IP
 
     // UI 요소 변수 선언
     private lateinit var fileNameText: TextView
@@ -376,7 +377,7 @@ class RecordingDetailActivity : AppCompatActivity() {
                     .build()
 
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/ai/stt")
+                    .url("http://${serverIp}/ai/stt")
                     .post(requestBody)
                     .header("Authorization", "Bearer $token")
                     .build()
@@ -432,7 +433,7 @@ class RecordingDetailActivity : AppCompatActivity() {
                     .build()
 
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/ai/gemini")
+                    .url("http://${serverIp}/ai/gemini")
                     .post(requestBody)
                     .header("Authorization", "Bearer $token")
                     .build()
@@ -599,8 +600,9 @@ class RecordingDetailActivity : AppCompatActivity() {
     }
 
     private fun updateTimeText(textView: TextView, timeMs: Int) {
-        val minutes = timeMs / 1000 / 60
-        val seconds = (timeMs / 1000) % 60
+        val totalSeconds = timeMs / 1000  // 먼저 전체 초를 계산
+        val minutes = totalSeconds / 60    // 분 계산
+        val seconds = totalSeconds % 60    // 남은 초 계산
         textView.text = String.format("%02d:%02d", minutes, seconds)
     }
 

@@ -11,10 +11,10 @@
         android:layout_height="32dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="4dp"
-        android:src="@drawable/newlogo" />
+        android:src="@drawable/newlogo2" />
 
     <androidx.cardview.widget.CardView
-        style="@style/CardMinimal"
+        style="@style/ChatCard"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="48dp"
@@ -25,7 +25,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxWidth="280dp"
-            android:padding="12dp"
             android:text="AI 메시지"
             android:textColor="@color/textPrimary"
             style="@style/TextBody1" />

@@ -127,7 +127,7 @@ public class ChatbotService {
         prompt.append("""
                 [역할] 당신은 AI 챗봇입니다.
                 [출력] 유저가 편안함을 느낄 수 있는 출력물
-                [제약] 원래 있던 내용을 기반으로 답장을 해줘야 합니다. 없는 내용이라면 관련 내용이 없다고 표시해야 합니다.
+                [제약] 원래 있던 내용을 기반으로 답장을 해줘야 합니다. 없는 내용이라면 관련 내용이 없다고 표시해야 합니다. 이모지는 절대 없이 답변해야 합니다.
                 [기타] 유저가 관련 내용에 대해 궁금해 한다면 답변해야 합니다.
                 [내용]
                 """);
@@ -144,6 +144,12 @@ public class ChatbotService {
 
         // 3. LLM API 호출
         String aiResponse = geminiService.callGemini(prompt.toString());
+
+        if (aiResponse.endsWith("\r\n")) {
+            return aiResponse.substring(0, aiResponse.length() - 2);
+        } else if (aiResponse.endsWith("\n") || aiResponse.endsWith("\r")) {
+            return aiResponse.substring(0, aiResponse.length() - 1);
+        }
 
         return aiResponse;
     }

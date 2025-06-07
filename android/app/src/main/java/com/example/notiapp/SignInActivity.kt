@@ -3,6 +3,8 @@ package com.example.notiapp
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.MotionEvent
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -22,6 +24,7 @@ import kotlin.concurrent.thread
 class SignInActivity : AppCompatActivity() {
 
     private val TAG = "SignInActivity"
+    val serverIp = AddressAdmin.MY_SERVER_IP
 
     // UI 요소 변수 선언
     private lateinit var userIdEditText: EditText
@@ -29,6 +32,13 @@ class SignInActivity : AppCompatActivity() {
     private lateinit var signInButton: Button
     private lateinit var signUpButton: Button
     private lateinit var findPasswordButton: Button
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        val imm: InputMethodManager =
+            getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
+        return super.dispatchTouchEvent(ev)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -136,7 +146,7 @@ class SignInActivity : AppCompatActivity() {
                 val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
                 val requestBody = jsonData.toRequestBody(mediaType)
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/auth/login")
+                    .url("http://${serverIp}/auth/login")
                     .post(requestBody)
                     .header("Content-Type", "application/json") // JSON 형식으로 일치
                     .build()

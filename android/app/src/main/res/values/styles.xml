@@ -118,6 +118,23 @@
         <item name="contentPadding">24dp</item>
     </style>
 
+    <style name="ChatCard">
+        <item name="cardCornerRadius">24dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="cardBackgroundColor">@color/cardBackground</item>
+        <item name="android:layout_margin">8dp</item>
+        <item name="contentPadding">16dp</item>
+    </style>
+
+    <style name="RecCard">
+        <item name="cardCornerRadius">24dp</item>
+        <item name="android:padding">15dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="cardBackgroundColor">@color/cardBackground</item>
+        <item name="android:layout_margin">8dp</item>
+        <item name="contentPadding">16dp</item>
+    </style>
+
     <!-- 하단 네비게이션 스타일 -->
 
     <style name="BottomNavigationMinimal" parent="Widget.Design.BottomNavigationView">

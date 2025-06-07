@@ -44,6 +44,7 @@ class RecordActivity : AppCompatActivity() {
 
     private val TAG = "recordActivity"
     private val RECORD_AUDIO_PERMISSION_CODE = 200
+    val serverIp = AddressAdmin.MY_SERVER_IP
 
     // 녹음 관련 변수들
     private var mediaRecorder: MediaRecorder? = null
@@ -564,7 +565,7 @@ class RecordActivity : AppCompatActivity() {
                     .build()
 
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/file/upload/audio")
+                    .url("http://${serverIp}/file/upload/audio")
                     .post(requestBody)
                     .header("Authorization", "Bearer $token")
                     .build()

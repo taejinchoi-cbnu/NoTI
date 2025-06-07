@@ -1,12 +1,13 @@
 package com.example.notiapp
 
-import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -16,20 +17,22 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import okhttp3.FormBody
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
+import android.content.Context
 
 class ChatbotActivity : AppCompatActivity() {
 
     private val TAG = "ChatbotActivity"
+    val serverIp = AddressAdmin.MY_SERVER_IP
 
     // UI 요소들
     private lateinit var chatTitleText: TextView
@@ -41,6 +44,11 @@ class ChatbotActivity : AppCompatActivity() {
     private lateinit var chatFileRecyclerView: RecyclerView
     private lateinit var chatEmptyStateLayout: LinearLayout
     private lateinit var chatFileAdapter: ChatFileAdapter
+
+    // 필터 버튼들
+    private lateinit var chatFilterAllButton: Button
+    private lateinit var chatFilterLocalButton: Button
+    private lateinit var chatFilterServerButton: Button
 
     // 2. 세션 준비 화면
     private lateinit var sessionSetupLayout: LinearLayout
@@ -60,9 +68,20 @@ class ChatbotActivity : AppCompatActivity() {
 
     // 데이터
     private var allRecordings = mutableListOf<RecordingItem>()
+    private var filteredRecordings = mutableListOf<RecordingItem>()
     private var currentSelectedFile: RecordingItem? = null
     private var currentSessionId: Long? = null
     private var chatMessages = mutableListOf<ChatMessage>()
+
+    // 필터링 상태 관리
+    private var currentFilter = FilterType.ALL
+
+    // 필터 타입 enum
+    enum class FilterType {
+        ALL,      // 전체
+        LOCAL,    // 내 기기 (로컬 + 다운로드된 서버 파일)
+        SERVER    // 서버만 (다운로드되지 않은 서버 파일)
+    }
 
     // 상태 관리
     private enum class ScreenState {
@@ -71,6 +90,7 @@ class ChatbotActivity : AppCompatActivity() {
         CHATTING       // 채팅 중
     }
     private var currentState = ScreenState.FILE_LIST
+    private lateinit var sessionManager: ChatSessionManager
 
     // HTTP 클라이언트
     private val client = OkHttpClient.Builder()
@@ -78,6 +98,13 @@ class ChatbotActivity : AppCompatActivity() {
         .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        val imm: InputMethodManager =
+            getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
+        return super.dispatchTouchEvent(ev)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,6 +119,7 @@ class ChatbotActivity : AppCompatActivity() {
 
         // UI 요소 초기화
         initializeViews()
+        sessionManager = ChatSessionManager(this)
 
         // 어댑터 설정
         setupAdapters()
@@ -117,6 +145,11 @@ class ChatbotActivity : AppCompatActivity() {
         chatFileRecyclerView = findViewById(R.id.chatFileRecyclerView)
         chatEmptyStateLayout = findViewById(R.id.chatEmptyStateLayout)
 
+        // 필터 버튼들
+        chatFilterAllButton = findViewById(R.id.chatFilterAllButton)
+        chatFilterLocalButton = findViewById(R.id.chatFilterLocalButton)
+        chatFilterServerButton = findViewById(R.id.chatFilterServerButton)
+
         // 2. 세션 준비 화면
         sessionSetupLayout = findViewById(R.id.sessionSetupLayout)
         selectedFileNameText = findViewById(R.id.selectedFileNameText)
@@ -135,9 +168,10 @@ class ChatbotActivity : AppCompatActivity() {
 
     private fun setupAdapters() {
         // 파일 목록 어댑터
-        chatFileAdapter = ChatFileAdapter(allRecordings) { recordingItem ->
+        chatFileAdapter = ChatFileAdapter(filteredRecordings, { recordingItem ->
             onFileSelected(recordingItem)
-        }
+        }, sessionManager)
+
         chatFileRecyclerView.layoutManager = LinearLayoutManager(this)
         chatFileRecyclerView.adapter = chatFileAdapter
 
@@ -152,11 +186,9 @@ class ChatbotActivity : AppCompatActivity() {
         backButton.setOnClickListener {
             when (currentState) {
                 ScreenState.SESSION_SETUP -> {
-                    // 세션 준비 화면에서 파일 목록으로
                     showFileListScreen()
                 }
                 ScreenState.CHATTING -> {
-                    // 채팅 화면에서 파일 목록으로
                     showFileListScreen()
                 }
                 else -> {
@@ -182,6 +214,73 @@ class ChatbotActivity : AppCompatActivity() {
             sendMessage()
             true
         }
+
+        // 필터 버튼 설정
+        setupFilterButtons()
+    }
+
+    private fun setupFilterButtons() {
+        chatFilterAllButton.setOnClickListener {
+            setActiveFilter(FilterType.ALL)
+        }
+
+        chatFilterLocalButton.setOnClickListener {
+            setActiveFilter(FilterType.LOCAL)
+        }
+
+        chatFilterServerButton.setOnClickListener {
+            setActiveFilter(FilterType.SERVER)
+        }
+    }
+
+    private fun setActiveFilter(filterType: FilterType) {
+        if (currentFilter == filterType) return
+
+        currentFilter = filterType
+        updateFilterButtonStyles()
+        applyFilter()
+    }
+
+    private fun updateFilterButtonStyles() {
+        // 모든 버튼 비활성 상태로
+        chatFilterAllButton.setBackgroundResource(R.drawable.filter_button_inactive)
+        chatFilterAllButton.setTextColor(resources.getColor(R.color.textSecondary, null))
+
+        chatFilterLocalButton.setBackgroundResource(R.drawable.filter_button_inactive)
+        chatFilterLocalButton.setTextColor(resources.getColor(R.color.textSecondary, null))
+
+        chatFilterServerButton.setBackgroundResource(R.drawable.filter_button_inactive)
+        chatFilterServerButton.setTextColor(resources.getColor(R.color.textSecondary, null))
+
+        // 선택된 버튼만 활성 상태로
+        when (currentFilter) {
+            FilterType.ALL -> {
+                chatFilterAllButton.setBackgroundResource(R.drawable.filter_button_active)
+                chatFilterAllButton.setTextColor(resources.getColor(R.color.white, null))
+            }
+            FilterType.LOCAL -> {
+                chatFilterLocalButton.setBackgroundResource(R.drawable.filter_button_active)
+                chatFilterLocalButton.setTextColor(resources.getColor(R.color.white, null))
+            }
+            FilterType.SERVER -> {
+                chatFilterServerButton.setBackgroundResource(R.drawable.filter_button_active)
+                chatFilterServerButton.setTextColor(resources.getColor(R.color.white, null))
+            }
+        }
+    }
+
+    private fun applyFilter() {
+        filteredRecordings = when (currentFilter) {
+            FilterType.ALL -> allRecordings.toMutableList()
+            FilterType.LOCAL -> allRecordings.filter { recording ->
+                !recording.isServerFile || (recording.isServerFile && recording.isDownloaded)
+            }.toMutableList()
+            FilterType.SERVER -> allRecordings.filter { recording ->
+                recording.isServerFile && !recording.isDownloaded
+            }.toMutableList()
+        }
+
+        updateFilteredUI()
     }
 
     private fun setupBottomNavigation() {
@@ -221,6 +320,9 @@ class ChatbotActivity : AppCompatActivity() {
 
         backButton.visibility = View.GONE
         chatTitleText.text = "AI 비서"
+
+        // 파일 목록 새로고침하여 아이콘 업데이트
+        chatFileAdapter.refreshSessionStatuses()
 
         Log.d(TAG, "파일 목록 화면 표시")
     }
@@ -264,44 +366,99 @@ class ChatbotActivity : AppCompatActivity() {
     // ========== 데이터 로딩 메서드들 ==========
 
     private fun loadRecordingFiles() {
-        // 서버에서 파일 목록 가져오기 (기존 DashboardActivity 로직 재사용)
+        // 먼저 로컬 파일들을 로드
+        val localRecordings = loadLocalRecordings()
+
+        // 서버에서 파일 정보를 가져와서 병합
+        fetchServerRecordings { serverRecordings ->
+            val combinedRecordings = combineRecordings(localRecordings, serverRecordings)
+
+            runOnUiThread {
+                updateFileListUI(combinedRecordings)
+            }
+        }
+    }
+
+    private fun loadLocalRecordings(): List<RecordingItem> {
+        val recordings = mutableListOf<RecordingItem>()
+
+        // SharedPreferences 인스턴스 생성
+        val sharedPreferences = getSharedPreferences("recording_files", MODE_PRIVATE)
+
+        // 앱 내부 저장소 내 녹음 파일 디렉토리
+        val recordingsDir = File(getExternalFilesDir(null), "recordings")
+        if (recordingsDir.exists()) {
+            val recordingFiles = recordingsDir.listFiles()
+            recordingFiles?.forEach { file ->
+                val filename = file.name
+                val date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                    .format(Date(file.lastModified()))
+
+                // 녹음 길이 추출 (간단히 파일 크기 기반으로 추정)
+                val durationSec = file.length() / 1024 / 16
+                val duration = String.format("%02d:%02d", durationSec / 60, durationSec % 60)
+
+                // SharedPreferences에서 서버 저장 파일명(UUID 포함) 가져오기
+                val serverSavedFileName = sharedPreferences.getString(filename, "") ?: ""
+
+                // savedFileName이 비어있으면 원본 파일명 사용 (fallback)
+                val finalSavedFileName = if (serverSavedFileName.isNotEmpty()) {
+                    serverSavedFileName
+                } else {
+                    filename
+                }
+
+                recordings.add(
+                    RecordingItem(
+                        file = file,
+                        filename = filename,
+                        date = date,
+                        duration = duration,
+                        filePath = file.absolutePath,
+                        isServerFile = false,
+                        savedFileName = finalSavedFileName, // UUID가 포함된 서버 파일명
+                        isDownloaded = true
+                    )
+                )
+
+                Log.d(TAG, "로컬 파일 로드: $filename -> savedFileName: $finalSavedFileName")
+            }
+        }
+
+        return recordings
+    }
+
+    private fun fetchServerRecordings(callback: (List<RecordingItem>) -> Unit) {
         val token = getJwtToken()
         if (token.isEmpty()) {
-            Log.w(TAG, "JWT 토큰이 없어 파일을 가져올 수 없습니다")
-            updateFileListUI(emptyList())
+            Log.w(TAG, "JWT 토큰이 없어 서버 파일을 가져올 수 없습니다")
+            callback(emptyList())
             return
         }
 
         thread {
             try {
-                // TODO: API만들어주면 수정하기 - 파일 목록 조회 API
                 val requestBody = FormBody.Builder().build()
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/file/get/file-information")
+                    .url("http://${serverIp}/file/get/file-information")
                     .post(requestBody)
                     .header("Authorization", "Bearer $token")
                     .build()
 
                 client.newCall(request).execute().use { response ->
                     val responseBody = response.body?.string()
-                    Log.d(TAG, "파일 목록 응답: ${response.code}")
+                    Log.d(TAG, "서버 파일 목록 응답: ${response.code}")
 
                     if (response.isSuccessful && responseBody != null) {
                         val recordings = parseServerFileResponse(responseBody)
-                        runOnUiThread {
-                            updateFileListUI(recordings)
-                        }
+                        callback(recordings)
                     } else {
-                        runOnUiThread {
-                            updateFileListUI(emptyList())
-                        }
+                        callback(emptyList())
                     }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "파일 목록 로드 오류: ${e.message}", e)
-                runOnUiThread {
-                    updateFileListUI(emptyList())
-                }
+                Log.e(TAG, "서버 파일 목록 로드 오류: ${e.message}", e)
+                callback(emptyList())
             }
         }
     }
@@ -332,18 +489,21 @@ class ChatbotActivity : AppCompatActivity() {
 
                 val formattedDuration = String.format("%02d:%02d", duration / 60, duration % 60)
 
+                // 로컬에 다운로드된 파일이 있는지 확인
+                val downloadedFile = checkIfDownloaded(savedName)
+
                 recordings.add(
                     RecordingItem(
-                        file = null,
+                        file = downloadedFile,
                         filename = originalName,
                         date = displayDate,
                         duration = formattedDuration,
-                        filePath = "",
+                        filePath = downloadedFile?.absolutePath ?: "",
                         isServerFile = true,
                         savedFileName = savedName,
                         fileSize = fileSize,
                         uploadDate = uploadDate,
-                        isDownloaded = false
+                        isDownloaded = downloadedFile != null
                     )
                 )
             }
@@ -354,23 +514,93 @@ class ChatbotActivity : AppCompatActivity() {
         return recordings
     }
 
+    private fun checkIfDownloaded(savedFileName: String): File? {
+        val downloadsDir = File(getExternalFilesDir(null), "downloads")
+        if (downloadsDir.exists()) {
+            val downloadedFile = File(downloadsDir, savedFileName)
+            return if (downloadedFile.exists()) downloadedFile else null
+        }
+        return null
+    }
+
+    private fun combineRecordings(
+        localRecordings: List<RecordingItem>,
+        serverRecordings: List<RecordingItem>
+    ): List<RecordingItem> {
+        val combinedList = mutableListOf<RecordingItem>()
+
+        // 로컬 파일들을 먼저 추가
+        combinedList.addAll(localRecordings)
+
+        // 서버 파일들 중 로컬에 없는 것만 추가
+        serverRecordings.forEach { serverFile ->
+            val existsLocally = localRecordings.any { localFile ->
+                localFile.filename == serverFile.filename
+            }
+
+            if (!existsLocally) {
+                combinedList.add(serverFile)
+            }
+        }
+
+        // 날짜 기준 정렬 (최신 순)
+        return combinedList.sortedByDescending { recording ->
+            if (recording.isServerFile) {
+                try {
+                    SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS", Locale.getDefault())
+                        .parse(recording.uploadDate)?.time ?: 0L
+                } catch (e: Exception) {
+                    0L
+                }
+            } else {
+                recording.file?.lastModified() ?: 0L
+            }
+        }
+    }
+
     private fun updateFileListUI(recordings: List<RecordingItem>) {
         allRecordings.clear()
         allRecordings.addAll(recordings)
 
-        chatFileAdapter.updateRecordings(recordings)
+        // 필터 적용
+        applyFilter()
+    }
 
-        // 파일 개수 업데이트
-        chatFileCountText.text = if (recordings.isEmpty()) {
-            "파일 없음"
-        } else {
-            "총 ${recordings.size}개 파일"
+    private fun updateFilteredUI() {
+        chatFileAdapter.updateRecordings(filteredRecordings)
+
+        // 파일 개수 업데이트 (필터별로)
+        val totalCount = filteredRecordings.size
+        val filterText = when (currentFilter) {
+            FilterType.ALL -> {
+                val localCount = allRecordings.count { !it.isServerFile || (it.isServerFile && it.isDownloaded) }
+                val serverCount = allRecordings.count { it.isServerFile && !it.isDownloaded }
+                when {
+                    totalCount == 0 -> "파일 없음"
+                    localCount > 0 && serverCount > 0 -> "총 ${totalCount}개 (로컬 ${localCount}개, 서버 ${serverCount}개)"
+                    localCount > 0 -> "총 ${totalCount}개 (로컬 파일)"
+                    serverCount > 0 -> "총 ${totalCount}개 (서버 파일)"
+                    else -> "총 ${totalCount}개 파일"
+                }
+            }
+            FilterType.LOCAL -> if (totalCount == 0) "내 기기에 파일 없음" else "내 기기: ${totalCount}개 파일"
+            FilterType.SERVER -> if (totalCount == 0) "서버에 파일 없음" else "서버: ${totalCount}개 파일"
         }
 
+        chatFileCountText.text = filterText
+
         // 빈 상태 처리
-        if (recordings.isEmpty()) {
+        if (filteredRecordings.isEmpty()) {
             chatFileRecyclerView.visibility = View.GONE
             chatEmptyStateLayout.visibility = View.VISIBLE
+
+            // 빈 상태 메시지도 필터에 따라 변경
+            val emptyMessageView = chatEmptyStateLayout.getChildAt(1) as? TextView
+            emptyMessageView?.text = when (currentFilter) {
+                FilterType.ALL -> "녹음 파일이 없습니다"
+                FilterType.LOCAL -> "내 기기에 저장된 파일이 없습니다"
+                FilterType.SERVER -> "서버에만 저장된 파일이 없습니다"
+            }
         } else {
             chatFileRecyclerView.visibility = View.VISIBLE
             chatEmptyStateLayout.visibility = View.GONE
@@ -382,48 +612,19 @@ class ChatbotActivity : AppCompatActivity() {
     private fun onFileSelected(recordingItem: RecordingItem) {
         Log.d(TAG, "파일 선택됨: ${recordingItem.filename}")
 
-        // 바로 세션 준비 화면으로 이동 (기존 세션 확인 로직 제거)
-        showSessionSetupScreen(recordingItem)
-    }
+        // 기존 세션이 있는지 확인
+        val existingSessionId = sessionManager.getSessionId(recordingItem.savedFileName)
 
-
-    private fun checkExistingChatSession(recordingItem: RecordingItem, callback: (Boolean, Long?) -> Unit) {
-        val token = getJwtToken()
-        if (token.isEmpty()) {
-            callback(false, null)
-            return
-        }
-
-        thread {
-            try {
-                // TODO: API만들어주면 수정하기 - 기존 세션 확인 API
-                val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/chatbot/check-session?fileName=${recordingItem.savedFileName}")
-                    .header("Authorization", "Bearer $token")
-                    .build()
-
-                client.newCall(request).execute().use { response ->
-                    val responseBody = response.body?.string()
-
-                    if (response.isSuccessful && responseBody != null) {
-                        try {
-                            val jsonResponse = JSONObject(responseBody)
-                            val hasSession = jsonResponse.getBoolean("hasSession")
-                            val sessionId = if (hasSession) jsonResponse.getLong("sessionId") else null
-
-                            callback(hasSession, sessionId)
-                        } catch (e: Exception) {
-                            Log.e(TAG, "세션 확인 응답 파싱 오류: ${e.message}", e)
-                            callback(false, null)
-                        }
-                    } else {
-                        callback(false, null)
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "세션 확인 오류: ${e.message}", e)
-                callback(false, null)
+        if (existingSessionId != null) {
+            Log.d(TAG, "기존 세션 발견: $existingSessionId")
+            // 바로 채팅 화면으로 이동
+            loadChatHistory(existingSessionId) {
+                showChatScreen(recordingItem, existingSessionId)
             }
+        } else {
+            Log.d(TAG, "새로운 세션 필요")
+            // 세션 준비 화면으로 이동
+            showSessionSetupScreen(recordingItem)
         }
     }
 
@@ -442,13 +643,12 @@ class ChatbotActivity : AppCompatActivity() {
 
         thread {
             try {
-                // FormData 형식으로 savedFileName 전송
                 val requestBody = FormBody.Builder()
                     .add("savedFileName", recordingItem.savedFileName)
                     .build()
 
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/chatbot/session")
+                    .url("http://${serverIp}/chatbot/session")
                     .post(requestBody)
                     .header("Authorization", "Bearer $token")
                     .build()
@@ -460,18 +660,19 @@ class ChatbotActivity : AppCompatActivity() {
                         if (response.isSuccessful && responseBody != null) {
                             try {
                                 val jsonResponse = JSONObject(responseBody)
-                                val sessionId = jsonResponse.getLong("sessionId") // Long으로 파싱
+                                val sessionId = jsonResponse.getLong("sessionId")
                                 val status = jsonResponse.getString("sessionStatus")
+
+                                // 세션 ID 저장
+                                sessionManager.saveSession(recordingItem.savedFileName, sessionId)
 
                                 when (status) {
                                     "READY" -> {
-                                        // 즉시 채팅 가능 - 히스토리 로드 후 채팅 화면 표시
                                         loadChatHistory(sessionId) {
                                             showChatScreen(recordingItem, sessionId)
                                         }
                                     }
                                     "INITIALIZING" -> {
-                                        // 준비 중 - 상태 확인 반복
                                         checkSessionStatus(sessionId, recordingItem)
                                     }
                                     else -> {
@@ -502,9 +703,8 @@ class ChatbotActivity : AppCompatActivity() {
         handler.postDelayed({
             thread {
                 try {
-                    // TODO: API만들어주면 수정하기 - 세션 상태 확인 API
                     val request = Request.Builder()
-                        .url("http://10.0.2.2:8080/chatbot/session-status/$sessionId")
+                        .url("http://${serverIp}/chatbot/session-status/$sessionId")
                         .header("Authorization", "Bearer ${getJwtToken()}")
                         .build()
 
@@ -522,7 +722,6 @@ class ChatbotActivity : AppCompatActivity() {
                                             showChatScreen(recordingItem, sessionId)
                                         }
                                         "INITIALIZING" -> {
-                                            // 계속 대기
                                             checkSessionStatus(sessionId, recordingItem)
                                         }
                                         "ERROR" -> {
@@ -551,20 +750,23 @@ class ChatbotActivity : AppCompatActivity() {
         loadingStatusText.visibility = View.GONE
         createChatbotButton.visibility = View.VISIBLE
 
+        // 세션 생성 실패 시 저장된 정보 제거
+        currentSelectedFile?.let { file ->
+            sessionManager.removeSession(file.savedFileName)
+        }
+
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
         Log.e(TAG, "세션 오류: $message")
     }
 
     // ========== 채팅 메시지 처리 ==========
 
-    // ChatbotActivity.kt - loadChatHistory() 메서드 수정
     private fun loadChatHistory(sessionId: Long, onComplete: () -> Unit = {}) {
         thread {
             try {
-                // GET 방식으로 sessionId를 URL에 포함하여 요청
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/chatbot/history/$sessionId")
-                    .get() // GET 방식
+                    .url("http://${serverIp}/chatbot/history/$sessionId")
+                    .get()
                     .header("Authorization", "Bearer ${getJwtToken()}")
                     .build()
 
@@ -597,7 +799,7 @@ class ChatbotActivity : AppCompatActivity() {
             }
         }
     }
-    // ChatbotActivity.kt - parseChatHistory() 메서드 수정
+
     private fun parseChatHistory(responseBody: String): List<ChatMessage> {
         val messages = mutableListOf<ChatMessage>()
 
@@ -606,9 +808,8 @@ class ChatbotActivity : AppCompatActivity() {
 
             for (i in 0 until jsonArray.length()) {
                 val jsonObject = jsonArray.getJSONObject(i)
-                val id = jsonObject.getInt("id")
-                val question = jsonObject.getString("question") // question 필드명
-                val isUser = jsonObject.getBoolean("isUser") // isUser 필드명
+                val question = jsonObject.getString("question")
+                val isUser = jsonObject.getBoolean("isUser")
                 val timestamp = jsonObject.getString("timestamp")
 
                 // 시간 파싱
@@ -628,7 +829,6 @@ class ChatbotActivity : AppCompatActivity() {
         return messages
     }
 
-    // ChatbotActivity.kt - sendMessage() 메서드 수정
     private fun sendMessage() {
         val messageText = messageEditText.text.toString().trim()
         if (messageText.isEmpty() || currentSessionId == null) {
@@ -650,14 +850,15 @@ class ChatbotActivity : AppCompatActivity() {
 
         thread {
             try {
-                // FormData 형식으로 sessionId와 message 전송
-                val requestBody = FormBody.Builder()
-                    .add("sessionId", currentSessionId.toString()) // Long을 String으로 변환
-                    .add("message", messageText)
+                // Multipart 형식으로 요청 생성
+                val requestBody = MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart("sessionId", currentSessionId.toString())
+                    .addFormDataPart("message", messageText)
                     .build()
 
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/chatbot/message")
+                    .url("http://${serverIp}/chatbot/message")
                     .post(requestBody)
                     .header("Authorization", "Bearer $token")
                     .build()
@@ -669,7 +870,7 @@ class ChatbotActivity : AppCompatActivity() {
                         if (response.isSuccessful && responseBody != null) {
                             try {
                                 val jsonResponse = JSONObject(responseBody)
-                                val aiResponse = jsonResponse.getString("aiMessage") // 백엔드 응답 필드명
+                                val aiResponse = jsonResponse.getString("aiMessage")
 
                                 // AI 응답 표시
                                 val aiMessage = ChatMessage(aiResponse, isUser = false)
@@ -713,6 +914,14 @@ class ChatbotActivity : AppCompatActivity() {
         return sharedPreferences.getString("jwt_token", "") ?: ""
     }
 
+    override fun onResume() {
+        super.onResume()
+        // 다른 화면에서 돌아왔을 때 파일 목록 새로고침
+        if (currentState == ScreenState.FILE_LIST) {
+            loadRecordingFiles()
+        }
+    }
+
     override fun onBackPressed() {
         when (currentState) {
             ScreenState.SESSION_SETUP, ScreenState.CHATTING -> {
@@ -724,7 +933,21 @@ class ChatbotActivity : AppCompatActivity() {
         }
     }
 
+
+    override fun onPause() {
+        super.onPause()
+        hideKeyboard()
+    }
+
+    private fun hideKeyboard() {
+        val imm: InputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        currentFocus?.let { view ->
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+        }
+    }
+
     override fun onDestroy() {
+
         super.onDestroy()
         Log.d(TAG, "ChatbotActivity 종료")
     }

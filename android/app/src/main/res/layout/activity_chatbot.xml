@@ -24,11 +24,11 @@
 
         <!-- 로고와 앱 이름 -->
         <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
             android:layout_marginEnd="12dp"
-            android:scaleType="centerCrop"
-            app:srcCompat="@drawable/newlogo" />
+            android:scaleType="fitXY"
+            app:srcCompat="@drawable/newlogo2" />
 
         <TextView
             android:id="@+id/chatTitleText"
@@ -41,10 +41,10 @@
         <!-- 뒤로가기 버튼 (채팅 화면에서만 표시) -->
         <ImageButton
             android:id="@+id/backButton"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_menu_revert"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/ic_back"
+            android:scaleType="fitXY"
             android:contentDescription="뒤로가기"
             android:visibility="gone" />
 
@@ -62,17 +62,58 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/headerLayout">
 
-        <!-- 파일 목록 제목 -->
-        <TextView
-            android:layout_width="wrap_content"
+        <!-- 파일 목록 제목과 필터 버튼 -->
+        <LinearLayout
+            android:id="@+id/fileListHeaderLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="24dp"
-            android:layout_marginBottom="16dp"
-            android:text="대화할 녹음 파일을 선택하세요"
-            android:fontFamily="@font/pretendardbold"
-            android:textSize="18sp"
-            android:textColor="@color/textPrimary" />
+            android:layout_marginEnd="14dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/pretendardbold"
+                android:text="대화할 파일을 선택하세요"
+                android:textColor="@color/textPrimary"
+                android:textSize="17sp" />
+
+            <!-- 필터 버튼 그룹 -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/chatFilterAllButton"
+                    style="@style/FilterButtonActive"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:text="전체" />
+
+                <Button
+                    android:id="@+id/chatFilterLocalButton"
+                    style="@style/FilterButtonInactive"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:text="내 기기" />
+
+                <Button
+                    android:id="@+id/chatFilterServerButton"
+                    style="@style/FilterButtonInactive"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="서버" />
+
+            </LinearLayout>
+
+        </LinearLayout>
 
         <!-- 파일 개수 표시 -->
         <TextView
@@ -80,6 +121,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:text="총 0개 파일"
             android:fontFamily="@font/pretendardregular"
@@ -123,7 +165,7 @@
                 android:layout_height="64dp"
                 android:layout_marginBottom="16dp"
                 android:alpha="0.3"
-                android:src="@android:drawable/ic_menu_agenda" />
+                android:src="@drawable/newlogo2" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -138,7 +180,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="먼저 녹음을 하고 오세요!"
+                android:text="먼저 녹음을 진행해주세요!"
                 android:fontFamily="@font/pretendardregular"
                 android:textSize="14sp"
                 android:textColor="@color/textSecondary"
@@ -299,12 +341,11 @@
 
             <ImageButton
                 android:id="@+id/sendButton"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
                 android:layout_marginStart="8dp"
-                android:background="@drawable/ic_play"
-                android:contentDescription="전송"
-                android:src="@android:drawable/ic_menu_send" />
+                android:background="@drawable/ic_send"
+                android:contentDescription="전송" />
 
         </LinearLayout>
 
