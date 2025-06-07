@@ -5,7 +5,9 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -25,10 +27,12 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
+import android.content.Context
 
 class ChatbotActivity : AppCompatActivity() {
 
     private val TAG = "ChatbotActivity"
+    val serverIp = AddressAdmin.MY_SERVER_IP
 
     // UI 요소들
     private lateinit var chatTitleText: TextView
@@ -94,6 +98,13 @@ class ChatbotActivity : AppCompatActivity() {
         .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        val imm: InputMethodManager =
+            getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
+        return super.dispatchTouchEvent(ev)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -371,6 +382,9 @@ class ChatbotActivity : AppCompatActivity() {
     private fun loadLocalRecordings(): List<RecordingItem> {
         val recordings = mutableListOf<RecordingItem>()
 
+        // SharedPreferences 인스턴스 생성
+        val sharedPreferences = getSharedPreferences("recording_files", MODE_PRIVATE)
+
         // 앱 내부 저장소 내 녹음 파일 디렉토리
         val recordingsDir = File(getExternalFilesDir(null), "recordings")
         if (recordingsDir.exists()) {
@@ -384,6 +398,16 @@ class ChatbotActivity : AppCompatActivity() {
                 val durationSec = file.length() / 1024 / 16
                 val duration = String.format("%02d:%02d", durationSec / 60, durationSec % 60)
 
+                // SharedPreferences에서 서버 저장 파일명(UUID 포함) 가져오기
+                val serverSavedFileName = sharedPreferences.getString(filename, "") ?: ""
+
+                // savedFileName이 비어있으면 원본 파일명 사용 (fallback)
+                val finalSavedFileName = if (serverSavedFileName.isNotEmpty()) {
+                    serverSavedFileName
+                } else {
+                    filename
+                }
+
                 recordings.add(
                     RecordingItem(
                         file = file,
@@ -392,10 +416,12 @@ class ChatbotActivity : AppCompatActivity() {
                         duration = duration,
                         filePath = file.absolutePath,
                         isServerFile = false,
-                        savedFileName = filename,
+                        savedFileName = finalSavedFileName, // UUID가 포함된 서버 파일명
                         isDownloaded = true
                     )
                 )
+
+                Log.d(TAG, "로컬 파일 로드: $filename -> savedFileName: $finalSavedFileName")
             }
         }
 
@@ -414,7 +440,7 @@ class ChatbotActivity : AppCompatActivity() {
             try {
                 val requestBody = FormBody.Builder().build()
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/file/get/file-information")
+                    .url("http://${serverIp}/file/get/file-information")
                     .post(requestBody)
                     .header("Authorization", "Bearer $token")
                     .build()
@@ -622,7 +648,7 @@ class ChatbotActivity : AppCompatActivity() {
                     .build()
 
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/chatbot/session")
+                    .url("http://${serverIp}/chatbot/session")
                     .post(requestBody)
                     .header("Authorization", "Bearer $token")
                     .build()
@@ -678,7 +704,7 @@ class ChatbotActivity : AppCompatActivity() {
             thread {
                 try {
                     val request = Request.Builder()
-                        .url("http://10.0.2.2:8080/chatbot/session-status/$sessionId")
+                        .url("http://${serverIp}/chatbot/session-status/$sessionId")
                         .header("Authorization", "Bearer ${getJwtToken()}")
                         .build()
 
@@ -739,7 +765,7 @@ class ChatbotActivity : AppCompatActivity() {
         thread {
             try {
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/chatbot/history/$sessionId")
+                    .url("http://${serverIp}/chatbot/history/$sessionId")
                     .get()
                     .header("Authorization", "Bearer ${getJwtToken()}")
                     .build()
@@ -832,7 +858,7 @@ class ChatbotActivity : AppCompatActivity() {
                     .build()
 
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/chatbot/message")
+                    .url("http://${serverIp}/chatbot/message")
                     .post(requestBody)
                     .header("Authorization", "Bearer $token")
                     .build()
@@ -907,7 +933,21 @@ class ChatbotActivity : AppCompatActivity() {
         }
     }
 
+
+    override fun onPause() {
+        super.onPause()
+        hideKeyboard()
+    }
+
+    private fun hideKeyboard() {
+        val imm: InputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        currentFocus?.let { view ->
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+        }
+    }
+
     override fun onDestroy() {
+
         super.onDestroy()
         Log.d(TAG, "ChatbotActivity 종료")
     }

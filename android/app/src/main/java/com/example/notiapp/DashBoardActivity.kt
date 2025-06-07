@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
 class DashBoardActivity : AppCompatActivity() {
+    val serverIp = AddressAdmin.MY_SERVER_IP
 
     private lateinit var recordingsAdapter: RecordingsAdapter
     private lateinit var recordingsRecyclerView: RecyclerView
@@ -391,7 +392,7 @@ class DashBoardActivity : AppCompatActivity() {
                 val requestBody = FormBody.Builder().build()
 
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/file/get/file-information")
+                    .url("http://${serverIp}/file/get/file-information")
                     .post(requestBody)
                     .header("Authorization", "Bearer $token")
                     .build()
@@ -545,7 +546,7 @@ class DashBoardActivity : AppCompatActivity() {
 
                 // 서버 파일 다운로드 API 호출 아직 url 없음
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:8080/${recording.savedFileName}")
+                    .url("http://${serverIp}/${recording.savedFileName}")
                     .get()
                     .header("Authorization", "Bearer $token")
                     .build()
