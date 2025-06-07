@@ -145,6 +145,12 @@ public class ChatbotService {
         // 3. LLM API 호출
         String aiResponse = geminiService.callGemini(prompt.toString());
 
+        if (aiResponse.endsWith("\r\n")) {
+            return aiResponse.substring(0, aiResponse.length() - 2);
+        } else if (aiResponse.endsWith("\n") || aiResponse.endsWith("\r")) {
+            return aiResponse.substring(0, aiResponse.length() - 1);
+        }
+
         return aiResponse;
     }
 
