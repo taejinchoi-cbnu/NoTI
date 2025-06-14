@@ -69,7 +69,7 @@ class RecordActivity : AppCompatActivity() {
     private lateinit var stopButton: ImageButton
     private lateinit var recordingActiveButtonsLayout: LinearLayout
 
-    // 🔧 녹음 상태 카드 - 테두리 적용 대상
+    // 녹음 상태 카드 - 테두리 적용 대상
     private lateinit var recordingStatusCard: CardView
 
     // GIF 애니메이션 뷰
@@ -111,7 +111,7 @@ class RecordActivity : AppCompatActivity() {
         stopButton = findViewById(R.id.stopButton)
         recordingActiveButtonsLayout = findViewById(R.id.recordingActiveButtonsLayout)
 
-        // 🔧 상태 카드 초기화 (테두리 적용 대상)
+        // 상태 카드 초기화 (테두리 적용 대상)
         recordingStatusCard = findViewById(R.id.recordingStatusCard)
 
         // 애니메이션 뷰 초기화
@@ -121,10 +121,7 @@ class RecordActivity : AppCompatActivity() {
         recordingAnimationView.visibility = View.GONE
     }
 
-    /**
-     * 🔧 녹음 상태에 따라 카드 테두리를 설정하는 메서드
-     * @param state 현재 녹음 상태
-     */
+    // 녹음 상태에 따라 카드 테두리 설정
     private fun updateCardBorder(state: RecordingState) {
         val drawable = GradientDrawable().apply {
             // 기본 배경색 설정 (카드 배경색)
@@ -132,7 +129,7 @@ class RecordActivity : AppCompatActivity() {
 
             when (state) {
                 RecordingState.RECORDING -> {
-                    // 녹음 중일 때: accent color 테두리 2dp 적용
+                    // 녹음 중 테두리
                     setStroke(
                         resources.getDimensionPixelSize(R.dimen.recording_border_width), // 2dp
                         ContextCompat.getColor(this@RecordActivity, R.color.accentGreen)
@@ -151,26 +148,23 @@ class RecordActivity : AppCompatActivity() {
                 }
             }
 
-            // 둥근 모서리 설정 (카드의 corner radius와 동일하게)
+            // 둥근 모서리 설정
             cornerRadius = resources.getDimensionPixelSize(R.dimen.button_corner_radius).toFloat()
         }
 
         recordingStatusCard.background = drawable
     }
 
-    /**
-     * 🔧 카드 상태 변화 시 애니메이션을 적용하는 메서드
-     * @param state 변경될 상태
-     */
+    // 카드 상태 변화 애니메이션
     private fun animateCardStateChange(state: RecordingState) {
         when (state) {
             RecordingState.RECORDING -> {
-                // 녹음 시작 시: scale_in 애니메이션 적용
+                // 녹음 시작 애니메이션
                 val scaleInAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_in)
                 recordingStatusCard.startAnimation(scaleInAnimation)
             }
             RecordingState.PAUSED -> {
-                // 일시정지 시: fade_out 후 fade_in 효과
+                // 일시정지 애니메이션
                 val fadeAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_in)
                 recordingStatusCard.startAnimation(fadeAnimation)
             }
@@ -378,7 +372,7 @@ class RecordActivity : AppCompatActivity() {
     }
 
     private fun updateUIForRecordingState(state: RecordingState) {
-        // 🔧 상태 변경 시 카드 테두리 및 애니메이션 적용
+        // 상태 변경 시 카드 업데이트
         updateCardBorder(state)
         animateCardStateChange(state)
 
@@ -392,7 +386,7 @@ class RecordActivity : AppCompatActivity() {
                 recordButton.visibility = View.VISIBLE
                 recordingActiveButtonsLayout.visibility = View.GONE
 
-                // 🔧 대기 상태에서는 애니메이션 숨김
+                // 대기 상태에서는 애니메이션 숨김
                 recordingAnimationView.visibility = View.GONE
             }
 
@@ -410,7 +404,7 @@ class RecordActivity : AppCompatActivity() {
                 pauseButton.setImageResource(R.drawable.ic_pause)
                 pauseButton.contentDescription = "일시정지"
 
-                // 🔧 녹음 중 GIF 애니메이션 시작
+                // 녹음 중 GIF 애니메이션 시작
                 recordingAnimationView.visibility = View.VISIBLE
                 Glide.with(this)
                     .asGif()
@@ -427,7 +421,7 @@ class RecordActivity : AppCompatActivity() {
                 pauseButton.setImageResource(R.drawable.ic_play)
                 pauseButton.contentDescription = "재시작"
 
-                // 🔧 일시정지 시 애니메이션 정지
+                // 일시정지 시 애니메이션 정지
                 recordingAnimationView.visibility = View.GONE
             }
 
@@ -439,7 +433,7 @@ class RecordActivity : AppCompatActivity() {
                 recordButton.visibility = View.VISIBLE
                 recordingActiveButtonsLayout.visibility = View.GONE
 
-                // 🔧 완료 시 애니메이션 숨김
+                // 완료 시 애니메이션 숨김
                 recordingAnimationView.visibility = View.GONE
             }
         }
