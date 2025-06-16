@@ -126,12 +126,6 @@ graph TB
     C --> F[📄 RecordingDetailActivity<br/>녹음 상세보기]
     C --> G[👤 UserInfoActivity<br/>사용자 정보]
     F --> H[💬 ChatbotActivity<br/>AI 챗봇 대화]
-    
-    style A fill:#ff9999
-    style B fill:#99ccff
-    style C fill:#99ff99
-    style E fill:#ffcc99
-    style H fill:#cc99ff
 ```
 
 ### 🔄 백엔드 서비스 흐름
@@ -154,12 +148,6 @@ graph TB
     
     E --> K[🎤 Google STT API]
     E --> L[🧠 Gemini AI API]
-    
-    style A fill:#ff9999
-    style B fill:#99ccff
-    style J fill:#99ff99
-    style K fill:#ffcc99
-    style L fill:#cc99ff
 ```
 
 ## 🚀 실행 방법
