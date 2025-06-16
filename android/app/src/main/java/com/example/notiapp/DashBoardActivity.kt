@@ -120,21 +120,16 @@ class DashBoardActivity : AppCompatActivity() {
     private fun setupDashboardCards() {
         // 카드 1 - Google 홈페이지
         findViewById<CardView>(R.id.dashboardCard1).setOnClickListener {
-            openUrlInBrowser("https://www.google.com")
+            openUrlInBrowser("https://www.notion.so/Noti-AI-20c78130257c80b0b9e0dcf0c66df6eb?source=copy_link")
         }
 
-        // 카드 2 - Google 홈페이지 (개발 문서 - 임시)
+        // 카드 2 - 더미 데이터
         findViewById<CardView>(R.id.dashboardCard2).setOnClickListener {
             openUrlInBrowser("https://www.google.com")
         }
 
-        // 카드 3 - Google 홈페이지 (설정 가이드 - 임시)
+        // 카드 3 - 더미 데이터
         findViewById<CardView>(R.id.dashboardCard3).setOnClickListener {
-            openUrlInBrowser("https://www.google.com")
-        }
-
-        // 카드 4 - Google 홈페이지 (지원 센터 - 임시)
-        findViewById<CardView>(R.id.dashboardCard4).setOnClickListener {
             openUrlInBrowser("https://www.google.com")
         }
     }

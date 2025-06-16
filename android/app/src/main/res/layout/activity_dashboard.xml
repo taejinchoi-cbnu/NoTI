@@ -87,7 +87,7 @@
                             style="@style/TextBody1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Google 홈페이지"
+                            android:text="Noti – 직장인을 위한 AI 회의 비서"
                             android:textColor="@color/textPrimary" />
 
                         <TextView
@@ -95,7 +95,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="구글에서 더 많은 정보를 찾아보세요" />
+                            android:text="사용 설명서 읽어보기" />
 
                     </LinearLayout>
 
@@ -103,11 +103,10 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:layout_marginStart="12dp"
-                        android:src="@android:drawable/ic_menu_search" />
+                        android:src="@android:drawable/ic_menu_agenda" />
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
-
             <!-- 카드 2 -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/dashboardCard2"
@@ -137,7 +136,7 @@
                             style="@style/TextBody1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="타이틀"
+                            android:text="개발 과정이 궁금하신가요?"
                             android:textColor="@color/textPrimary" />
 
                         <TextView
@@ -145,7 +144,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="설명텍스트 이미지 src변경 가능" />
+                            android:text="개발 리포트를 공개합니다!" />
 
                     </LinearLayout>
 
@@ -187,7 +186,7 @@
                             style="@style/TextBody1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="타이틀"
+                            android:text="도움이 필요하신가요?"
                             android:textColor="@color/textPrimary" />
 
                         <TextView
@@ -195,7 +194,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="설명텍스트 이미지 src변경 가능" />
+                            android:text="고객센터 연결" />
 
                     </LinearLayout>
 
@@ -207,56 +206,6 @@
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
-
-            <!-- 카드 4 -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/dashboardCard4"
-                style="@style/CardMinimalLarge"
-                android:layout_width="280dp"
-                android:layout_height="120dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                app:cardBackgroundColor="@color/cardYellow">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="16dp">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            style="@style/TextBody1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="타이틀"
-                            android:textColor="@color/textPrimary" />
-
-                        <TextView
-                            style="@style/TextBody2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="설명텍스트 이미지 src변경 가능" />
-
-                    </LinearLayout>
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:layout_marginStart="12dp"
-                        android:src="@android:drawable/ic_menu_help" />
-
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
         </LinearLayout>
     </HorizontalScrollView>
 
