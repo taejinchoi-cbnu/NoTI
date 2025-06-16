@@ -105,6 +105,63 @@ NotiApp/
     └── 활동일지 및 주차별 스크럼/   # 개발 일지
 ```
 
+```mermaid
+graph TB
+    A[📱 Android 앱<br/>Kotlin + Material Design] 
+    A --> B[🌐 Spring Boot 백엔드<br/>Java 17 + JWT 보안]
+    B --> C[🗄️ MySQL 데이터베이스<br/>사용자 데이터 + 파일]
+    B --> D[🧠 AI 서비스]
+    D --> E[🎤 Google Speech-to-Text]
+    D --> F[💡 Google Gemini AI]
+```
+
+### 📱 Android 앱 화면 플로우
+```mermaid
+graph TB
+    A[🚀 SplashActivity<br/>앱 시작 화면] --> B[🔐 SignInActivity<br/>로그인]
+    B --> C[🏠 DashBoardActivity<br/>메인 대시보드]
+    B --> D[✍️ SignUpActivity<br/>회원가입]
+    D --> B
+    C --> E[🎙️ RecordActivity<br/>음성 녹음]
+    C --> F[📄 RecordingDetailActivity<br/>녹음 상세보기]
+    C --> G[👤 UserInfoActivity<br/>사용자 정보]
+    F --> H[💬 ChatbotActivity<br/>AI 챗봇 대화]
+    
+    style A fill:#ff9999
+    style B fill:#99ccff
+    style C fill:#99ff99
+    style E fill:#ffcc99
+    style H fill:#cc99ff
+```
+
+### 🔄 백엔드 서비스 흐름
+```mermaid
+graph TB
+    A[📱 Android 클라이언트] --> B[🎛️ REST Controllers]
+    B --> C[🔐 AuthController<br/>인증 서비스]
+    B --> D[📁 FileController<br/>파일 업로드]
+    B --> E[🧠 AI Controllers<br/>STT/Chat/Summary]
+    
+    C --> F[🗃️ UserRepository]
+    D --> G[🗃️ AudioFileRepository]
+    E --> H[🗃️ SummationRepository]
+    E --> I[🗃️ ChatSessionRepository]
+    
+    F --> J[🗄️ MySQL Database]
+    G --> J
+    H --> J
+    I --> J
+    
+    E --> K[🎤 Google STT API]
+    E --> L[🧠 Gemini AI API]
+    
+    style A fill:#ff9999
+    style B fill:#99ccff
+    style J fill:#99ff99
+    style K fill:#ffcc99
+    style L fill:#cc99ff
+```
+
 ## 🚀 실행 방법
 
 ### 1️⃣ 사전 준비
