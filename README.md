@@ -42,33 +42,33 @@
 ## 🛠 기술 스택
 
 ### 🖥️ Backend
-- **Java 17**: 최신 LTS 버전의 Java 플랫폼
-- **Spring Boot 3.4.4**: 마이크로서비스 아키텍처 프레임워크
-- **Spring Data JPA**: 객체 관계 매핑 및 데이터베이스 연동
-- **Spring Security**: JWT 기반 인증 및 보안
-- **MySQL 8.0**: 관계형 데이터베이스 관리 시스템
-- **RESTful API**: 표준 HTTP API 설계
+- Java 17: ![Java](https://img.shields.io/badge/Java-17-007396?logo=java&logoColor=white)
+- Spring Boot 3.4.4: ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.4-6DB33F?logo=spring-boot&logoColor=white)
+- Spring Data JPA: ![Spring Data JPA](https://img.shields.io/badge/Spring%20Data%20JPA-6DB33F?logo=spring&logoColor=white)
+- Spring Security: ![Spring Security](https://img.shields.io/badge/Spring%20Security-6DB33F?logo=spring-security&logoColor=white)
+- MySQL 8.0: ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white)
+- RESTful API: ![RESTful API](https://img.shields.io/badge/API-RESTful-00599C?logo=rest&logoColor=white)
 
 ### 📱 Android Frontend
-- **Kotlin**: 현대적인 Android 개발 언어
-- **Android SDK (API 28-35)**: 안드로이드 네이티브 개발
-- **Jetpack Compose**: 현대적인 UI 툴킷
-- **View Binding**: 타입 안전한 뷰 바인딩
-- **OkHttp**: HTTP 클라이언트 라이브러리
-- **Glide**: 이미지 로딩 및 캐싱
+- Kotlin: ![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?logo=kotlin&logoColor=white)
+- Android SDK (API 28-35): ![Android SDK](https://img.shields.io/badge/Android%20SDK-API%2028--35-3DDC84?logo=android&logoColor=white)
+- Jetpack Compose: ![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-4285F4?logo=jetpack-compose&logoColor=white)
+- View Binding: ![View Binding](https://img.shields.io/badge/View%20Binding-3DDC84?logo=android&logoColor=white)
+- OkHttp: ![OkHttp](https://img.shields.io/badge/OkHttp-000000?logo=okhttp&logoColor=white)
+- Glide: ![Glide](https://img.shields.io/badge/Glide-black?logo=glide&logoColor=white)
 
 ### 🎨 UI/UX
-- **Material Design**: Google의 디자인 시스템
-- **Custom Animations**: 부드러운 사용자 경험
-- **Responsive Layout**: 다양한 화면 크기 지원
-- **Figma**: UI/UX 디자인 도구
+- Material Design: ![Material Design](https://img.shields.io/badge/Material%20Design-757575?logo=material-design&logoColor=white)
+- Custom Animations: ![Custom Animations](https://img.shields.io/badge/Animations-Custom-orange)
+- Responsive Layout: ![Responsive Layout](https://img.shields.io/badge/Layout-Responsive-blue)
+- Figma: ![Figma](https://img.shields.io/badge/Figma-F24E1E?logo=figma&logoColor=white)
 
 ### 🔧 개발 도구 및 API
-- **Google Speech-to-Text API**: 음성 인식 서비스
-- **Google Gemini AI**: AI 기반 요약 및 분석
-- **JWT (JSON Web Token)**: 인증 토큰 관리
-- **Postman**: API 테스트 및 문서화
-- **Gradle**: 빌드 자동화 도구
+- Google Speech-to-Text API: ![Google Speech-to-Text API](https://img.shields.io/badge/Google%20Speech--to--Text-4285F4?logo=google&logoColor=white)
+- Google Gemini AI: ![Google Gemini AI](https://img.shields.io/badge/Google%20Gemini%20AI-4285F4?logo=google&logoColor=white)
+- JWT (JSON Web Token): ![JWT](https://img.shields.io/badge/JWT-black?logo=json-web-tokens&logoColor=white)
+- Postman: ![Postman](https://img.shields.io/badge/Postman-FF6C37?logo=postman&logoColor=white)
+- Gradle: ![Gradle](https://img.shields.io/badge/Gradle-02303A?logo=gradle&logoColor=white)
 
 ## 📁 프로젝트 구조
 
@@ -103,6 +103,51 @@ NotiApp/
 └── 📋 document/                # 프로젝트 문서
     ├── agile/                  # 애자일 개발 문서
     └── 활동일지 및 주차별 스크럼/   # 개발 일지
+```
+
+```mermaid
+graph TB
+    A[📱 Android 앱<br/>Kotlin + Material Design] 
+    A --> B[🌐 Spring Boot 백엔드<br/>Java 17 + JWT 보안]
+    B --> C[🗄️ MySQL 데이터베이스<br/>사용자 데이터 + 파일]
+    B --> D[🧠 AI 서비스]
+    D --> E[🎤 Google Speech-to-Text]
+    D --> F[💡 Google Gemini AI]
+```
+
+### 📱 Android 앱 화면 플로우
+```mermaid
+graph TB
+    A[🚀 SplashActivity<br/>앱 시작 화면] --> B[🔐 SignInActivity<br/>로그인]
+    B --> C[🏠 DashBoardActivity<br/>메인 대시보드]
+    B --> D[✍️ SignUpActivity<br/>회원가입]
+    D --> B
+    C --> E[🎙️ RecordActivity<br/>음성 녹음]
+    C --> F[📄 RecordingDetailActivity<br/>녹음 상세보기]
+    C --> G[👤 UserInfoActivity<br/>사용자 정보]
+    F --> H[💬 ChatbotActivity<br/>AI 챗봇 대화]
+```
+
+### 🔄 백엔드 서비스 흐름
+```mermaid
+graph TB
+    A[📱 Android 클라이언트] --> B[🎛️ REST Controllers]
+    B --> C[🔐 AuthController<br/>인증 서비스]
+    B --> D[📁 FileController<br/>파일 업로드]
+    B --> E[🧠 AI Controllers<br/>STT/Chat/Summary]
+    
+    C --> F[🗃️ UserRepository]
+    D --> G[🗃️ AudioFileRepository]
+    E --> H[🗃️ SummationRepository]
+    E --> I[🗃️ ChatSessionRepository]
+    
+    F --> J[🗄️ MySQL Database]
+    G --> J
+    H --> J
+    I --> J
+    
+    E --> K[🎤 Google STT API]
+    E --> L[🧠 Gemini AI API]
 ```
 
 ## 🚀 실행 방법

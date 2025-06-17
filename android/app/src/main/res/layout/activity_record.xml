@@ -59,7 +59,7 @@
             android:orientation="vertical"
             android:padding="32dp">
 
-            <!-- 🔧 GIF 애니메이션 ImageView -->
+            <!-- GIF 애니메이션 ImageView -->
             <ImageView
                 android:id="@+id/recordingAnimationView"
                 android:layout_width="322dp"
@@ -105,7 +105,7 @@
         app:layout_constraintTop_toBottomOf="@id/recordingStatusCard"
         app:layout_constraintWidth_percent="0.8">
 
-        <!-- 🔧 통일된 버튼 컨테이너 (고정 위치) -->
+        <!-- 통일된 버튼 컨테이너 (고정 위치) -->
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

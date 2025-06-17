@@ -66,7 +66,6 @@ class ChatbotActivity : AppCompatActivity() {
     private lateinit var sendButton: ImageButton
     private lateinit var chatAdapter: ChatAdapter
 
-    // 데이터
     private var allRecordings = mutableListOf<RecordingItem>()
     private var filteredRecordings = mutableListOf<RecordingItem>()
     private var currentSelectedFile: RecordingItem? = null
@@ -92,7 +91,6 @@ class ChatbotActivity : AppCompatActivity() {
     private var currentState = ScreenState.FILE_LIST
     private lateinit var sessionManager: ChatSessionManager
 
-    // HTTP 클라이언트
     private val client = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
@@ -309,7 +307,7 @@ class ChatbotActivity : AppCompatActivity() {
         }
     }
 
-    // ========== 화면 전환 메서드들 ==========
+    // 화면 전환
 
     private fun showFileListScreen() {
         currentState = ScreenState.FILE_LIST
@@ -363,7 +361,7 @@ class ChatbotActivity : AppCompatActivity() {
         Log.d(TAG, "채팅 화면 표시: ${recordingItem.filename}")
     }
 
-    // ========== 데이터 로딩 메서드들 ==========
+    // 데이터 로딩
 
     private fun loadRecordingFiles() {
         // 먼저 로컬 파일들을 로드
@@ -398,10 +396,10 @@ class ChatbotActivity : AppCompatActivity() {
                 val durationSec = file.length() / 1024 / 16
                 val duration = String.format("%02d:%02d", durationSec / 60, durationSec % 60)
 
-                // SharedPreferences에서 서버 저장 파일명(UUID 포함) 가져오기
+                // 서버 저장 파일명 가져오기
                 val serverSavedFileName = sharedPreferences.getString(filename, "") ?: ""
 
-                // savedFileName이 비어있으면 원본 파일명 사용 (fallback)
+                // 파일명 fallback
                 val finalSavedFileName = if (serverSavedFileName.isNotEmpty()) {
                     serverSavedFileName
                 } else {
@@ -607,7 +605,7 @@ class ChatbotActivity : AppCompatActivity() {
         }
     }
 
-    // ========== 파일 선택 및 세션 관리 ==========
+    // 파일 선택 및 세션 관리
 
     private fun onFileSelected(recordingItem: RecordingItem) {
         Log.d(TAG, "파일 선택됨: ${recordingItem.filename}")
@@ -759,7 +757,7 @@ class ChatbotActivity : AppCompatActivity() {
         Log.e(TAG, "세션 오류: $message")
     }
 
-    // ========== 채팅 메시지 처리 ==========
+    // 채팅 메시지 처리
 
     private fun loadChatHistory(sessionId: Long, onComplete: () -> Unit = {}) {
         thread {
@@ -907,7 +905,7 @@ class ChatbotActivity : AppCompatActivity() {
         }
     }
 
-    // ========== 유틸리티 메서드들 ==========
+    // 유틸리티
 
     private fun getJwtToken(): String {
         val sharedPreferences = getSharedPreferences("auth_prefs", MODE_PRIVATE)
