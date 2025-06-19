@@ -113,6 +113,20 @@ graph TB
     B --> D[🧠 AI 서비스]
     D --> E[🎤 Google Speech-to-Text]
     D --> F[💡 Google Gemini AI]
+
+    %% 클래스 정의
+    classDef client fill:#ccf5e1,stroke:#00bf63,stroke-width:2px;
+    classDef backend fill:#e6f9f0,stroke:#009e53,stroke-width:2px;
+    classDef database fill:#fff5cc,stroke:#c9a000,stroke-width:2px;
+    classDef ai fill:#f5e6ff,stroke:#9c4dcc,stroke-width:2px;
+    classDef external fill:#f2f2f2,stroke:#666666,stroke-width:2px;
+
+    %% 클래스 적용
+    class A client;
+    class B backend;
+    class C database;
+    class D ai;
+    class E,F external;
 ```
 
 ### 📱 Android 앱 화면 플로우
@@ -126,6 +140,20 @@ graph TB
     C --> F[📄 RecordingDetailActivity<br/>녹음 상세보기]
     C --> G[👤 UserInfoActivity<br/>사용자 정보]
     F --> H[💬 ChatbotActivity<br/>AI 챗봇 대화]
+
+    %% 클래스 정의
+    classDef auth fill:#ccf5e1,stroke:#00bf63,stroke-width:2px;
+    classDef dashboard fill:#e6f9f0,stroke:#009e53,stroke-width:2px;
+    classDef record fill:#fff5cc,stroke:#c9a000,stroke-width:2px;
+    classDef user fill:#f2f2f2,stroke:#666666,stroke-width:2px;
+    classDef ai fill:#ffdfdf,stroke:#bf4040,stroke-width:2px;
+
+    %% 클래스 적용
+    class A,B,D auth;
+    class C dashboard;
+    class E,F record;
+    class G user;
+    class H ai;
 ```
 
 ### 🔄 백엔드 서비스 흐름
@@ -135,19 +163,33 @@ graph TB
     B --> C[🔐 AuthController<br/>인증 서비스]
     B --> D[📁 FileController<br/>파일 업로드]
     B --> E[🧠 AI Controllers<br/>STT/Chat/Summary]
-    
+
     C --> F[🗃️ UserRepository]
     D --> G[🗃️ AudioFileRepository]
     E --> H[🗃️ SummationRepository]
     E --> I[🗃️ ChatSessionRepository]
-    
+
     F --> J[🗄️ MySQL Database]
     G --> J
     H --> J
     I --> J
-    
+
     E --> K[🎤 Google STT API]
     E --> L[🧠 Gemini AI API]
+
+    %% 클래스 정의
+    classDef client fill:#ccf5e1,stroke:#00bf63,stroke-width:2px;
+    classDef controller fill:#e6f9f0,stroke:#009e53,stroke-width:2px;
+    classDef repository fill:#fff5cc,stroke:#c9a000,stroke-width:2px;
+    classDef database fill:#ffdfdf,stroke:#bf4040,stroke-width:2px;
+    classDef external fill:#f2f2f2,stroke:#666666,stroke-width:2px;
+
+    %% 클래스 적용
+    class A client;
+    class B,C,D,E controller;
+    class F,G,H,I repository;
+    class J database;
+    class K,L external;
 ```
 
 ## 🚀 실행 방법
