@@ -6,6 +6,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import androidx.core.content.FileProvider
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
@@ -31,12 +32,7 @@ import kotlin.concurrent.thread
 // Markwon 라이브러리 import
 import io.noties.markwon.Markwon
 import io.noties.markwon.linkify.LinkifyPlugin
-// PDF 다운로드를 위한 추가 import
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Environment
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+// PDF 공유를 위한 추가 import
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
@@ -45,9 +41,6 @@ class RecordingDetailActivity : AppCompatActivity() {
 
     private val TAG = "RecordingDetailActivity"
     val serverIp = AddressAdmin.MY_SERVER_IP
-    
-    // 권한 요청 코드
-    private val STORAGE_PERMISSION_CODE = 1001
 
     // UI 요소 변수 선언
     private lateinit var fileNameText: TextView
@@ -280,13 +273,13 @@ class RecordingDetailActivity : AppCompatActivity() {
             }
         }
 
-        // 복사 버튼들
+        // 공유 버튼들
         copyScriptButton.setOnClickListener {
-            showPdfDownloadDialog()
+            showPdfShareDialog()
         }
 
         copySummaryButton.setOnClickListener {
-            showPdfDownloadDialog()
+            showPdfShareDialog()
         }
     }
 
@@ -658,18 +651,14 @@ class RecordingDetailActivity : AppCompatActivity() {
     }
 
     /**
-     * PDF 다운로드 확인 다이얼로그 표시
+     * PDF 공유 확인 다이얼로그 표시
      */
-    private fun showPdfDownloadDialog() {
+    private fun showPdfShareDialog() {
         AlertDialog.Builder(this)
-            .setTitle("PDF 저장")
-            .setMessage("녹음 요약을 PDF로 저장하시겠습니까?")
+            .setTitle("PDF 공유")
+            .setMessage("녹음 요약을 PDF로 생성하여 공유하시겠습니까?")
             .setPositiveButton("예") { _, _ ->
-                if (checkStoragePermission()) {
-                    downloadPdfFromServer()
-                } else {
-                    requestStoragePermission()
-                }
+                generateAndSharePdf()
             }
             .setNegativeButton("아니오") { _, _ ->
                 // 기존 복사 기능 실행
@@ -678,61 +667,11 @@ class RecordingDetailActivity : AppCompatActivity() {
             .show()
     }
 
-    /**
-     * 저장소 권한 확인 (Android 10+ 대응)
-     */
-    private fun checkStoragePermission(): Boolean {
-        // Android 10 (API 29) 이상에서는 앱 전용 외부 저장소를 사용하므로 권한이 필요 없음
-        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-            true
-        } else {
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED
-        }
-    }
 
     /**
-     * 저장소 권한 요청 (Android 9 이하에서만)
+     * 서버에서 PDF 생성 후 공유
      */
-    private fun requestStoragePermission() {
-        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                STORAGE_PERMISSION_CODE
-            )
-        } else {
-            // Android 10 이상에서는 권한 불필요
-            downloadPdfFromServer()
-        }
-    }
-
-    /**
-     * 권한 요청 결과 처리
-     */
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
-            STORAGE_PERMISSION_CODE -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    downloadPdfFromServer()
-                } else {
-                    Toast.makeText(this, "저장소 권한이 필요합니다", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
-
-    /**
-     * 서버에서 PDF 다운로드
-     */
-    private fun downloadPdfFromServer() {
+    private fun generateAndSharePdf() {
         if (savedFileName.isEmpty()) {
             Toast.makeText(this, "파일명을 찾을 수 없습니다", Toast.LENGTH_SHORT).show()
             return
@@ -746,7 +685,7 @@ class RecordingDetailActivity : AppCompatActivity() {
 
         // 로딩 다이얼로그 표시
         val progressDialog = ProgressDialog(this).apply {
-            setMessage("PDF를 생성하고 다운로드 중...")
+            setMessage("PDF를 생성하고 있습니다...")
             setCancelable(false)
             show()
         }
@@ -775,7 +714,7 @@ class RecordingDetailActivity : AppCompatActivity() {
                         progressDialog.dismiss()
                         
                         if (response.isSuccessful && pdfBytes != null) {
-                            savePdfToDownloads(pdfBytes)
+                            savePdfAndShare(pdfBytes)
                         } else if (response.isSuccessful && pdfBytes == null) {
                             Toast.makeText(this, "PDF 데이터를 받을 수 없습니다", Toast.LENGTH_SHORT).show()
                         } else {
@@ -799,75 +738,66 @@ class RecordingDetailActivity : AppCompatActivity() {
     }
 
     /**
-     * PDF 파일을 저장 (Android 버전별 대응)
+     * PDF 파일을 임시 저장 후 공유
      */
-    private fun savePdfToDownloads(pdfBytes: ByteArray) {
+    private fun savePdfAndShare(pdfBytes: ByteArray) {
         try {
             val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
             val cleanFileName = fileName.replace(".mp3", "").replace(".wav", "")
             val pdfFileName = "요약_${cleanFileName}_${timestamp}.pdf"
             
-            val savedFile = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                // Android 10 이상: 앱 전용 외부 저장소 사용
-                saveToAppExternalStorage(pdfBytes, pdfFileName)
-            } else {
-                // Android 9 이하: 공용 Downloads 폴더 사용
-                saveToPublicDownloads(pdfBytes, pdfFileName)
+            // 임시 파일을 앱 캐시 디렉토리에 저장
+            val cacheDir = File(cacheDir, "shared_pdfs")
+            if (!cacheDir.exists()) {
+                cacheDir.mkdirs()
             }
-
-            if (savedFile != null) {
-                Log.d(TAG, "PDF 저장 성공: ${savedFile.absolutePath}")
-                Toast.makeText(this, "PDF가 저장되었습니다\n위치: ${savedFile.absolutePath}", Toast.LENGTH_LONG).show()
+            
+            val pdfFile = File(cacheDir, pdfFileName)
+            FileOutputStream(pdfFile).use { fos ->
+                fos.write(pdfBytes)
+            }
+            
+            if (pdfFile.exists()) {
+                Log.d(TAG, "PDF 생성 성공: ${pdfFile.absolutePath}")
+                sharePdfFile(pdfFile)
             } else {
-                Toast.makeText(this, "PDF 저장에 실패했습니다", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "PDF 생성에 실패했습니다", Toast.LENGTH_SHORT).show()
             }
 
         } catch (e: Exception) {
-            Log.e(TAG, "PDF 저장 오류: ${e.message}", e)
-            Toast.makeText(this, "PDF 저장에 실패했습니다: ${e.message}", Toast.LENGTH_LONG).show()
+            Log.e(TAG, "PDF 생성 오류: ${e.message}", e)
+            Toast.makeText(this, "PDF 생성에 실패했습니다: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
     /**
-     * 앱 전용 외부 저장소에 저장 (Android 10+)
+     * PDF 파일 공유
      */
-    private fun saveToAppExternalStorage(pdfBytes: ByteArray, fileName: String): File? {
-        return try {
-            // 앱 전용 외부 저장소의 Documents 폴더 사용
-            val documentsDir = File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "PDFs")
-            if (!documentsDir.exists()) {
-                documentsDir.mkdirs()
+    private fun sharePdfFile(pdfFile: File) {
+        try {
+            val pdfUri = FileProvider.getUriForFile(
+                this,
+                "${packageName}.fileprovider",
+                pdfFile
+            )
+            
+            val shareIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                type = "application/pdf"
+                putExtra(Intent.EXTRA_STREAM, pdfUri)
+                putExtra(Intent.EXTRA_SUBJECT, "녹음 요약 - ${fileName}")
+                putExtra(Intent.EXTRA_TEXT, "녹음 파일의 요약 내용입니다.")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
             
-            val pdfFile = File(documentsDir, fileName)
-            FileOutputStream(pdfFile).use { fos ->
-                fos.write(pdfBytes)
-            }
-            pdfFile
-        } catch (e: Exception) {
-            Log.e(TAG, "앱 전용 저장소 저장 실패: ${e.message}", e)
-            null
-        }
-    }
-
-    /**
-     * 공용 Downloads 폴더에 저장 (Android 9 이하)
-     */
-    private fun saveToPublicDownloads(pdfBytes: ByteArray, fileName: String): File? {
-        return try {
-            val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-            if (!downloadsDir.exists()) {
-                downloadsDir.mkdirs()
-            }
+            val chooserIntent = Intent.createChooser(shareIntent, "PDF 공유 방법 선택")
+            startActivity(chooserIntent)
             
-            val pdfFile = File(downloadsDir, fileName)
-            FileOutputStream(pdfFile).use { fos ->
-                fos.write(pdfBytes)
-            }
-            pdfFile
+            Log.d(TAG, "PDF 공유 시작: ${pdfFile.name}")
+            
         } catch (e: Exception) {
-            Log.e(TAG, "공용 Downloads 저장 실패: ${e.message}", e)
-            null
+            Log.e(TAG, "PDF 공유 오류: ${e.message}", e)
+            Toast.makeText(this, "PDF 공유에 실패했습니다: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
