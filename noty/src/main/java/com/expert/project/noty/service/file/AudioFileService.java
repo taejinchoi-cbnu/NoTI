@@ -3,15 +3,24 @@ package com.expert.project.noty.service.file;
 import com.expert.project.noty.dto.file.AudioGetFileInformationResponse;
 import com.expert.project.noty.dto.file.AudioUploadRequest;
 import com.expert.project.noty.entity.AudioFileEntity;
+import com.expert.project.noty.entity.SummationEntity;
 import com.expert.project.noty.repository.AudioFileRepository;
+import com.expert.project.noty.repository.SummationRepository;
 import com.expert.project.noty.service.ai.AudioProcessingService;
+import com.lowagie.text.pdf.BaseFont;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.xhtmlrenderer.pdf.ITextFontResolver;
+import org.xhtmlrenderer.pdf.ITextRenderer;
+import com.vladsch.flexmark.html.HtmlRenderer;
+import com.vladsch.flexmark.parser.Parser;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -33,11 +42,18 @@ public class    AudioFileService {
 
     private final AudioFileRepository audioFileRepository;
     private final AudioProcessingService audioProcessingService;
+    private final SummationRepository summationRepository;
+
+    private final Parser parser = Parser.builder().build();
+    private final HtmlRenderer renderer = HtmlRenderer.builder().build();
 
 
-    public AudioFileService(AudioFileRepository audioFileRepository, AudioProcessingService audioProcessingService) {
+    public AudioFileService(AudioFileRepository audioFileRepository,
+                            AudioProcessingService audioProcessingService,
+                            SummationRepository summationRepository) {
         this.audioFileRepository = audioFileRepository;
         this.audioProcessingService = audioProcessingService;
+        this.summationRepository = summationRepository;
     }
 
     public String saveAudio(AudioUploadRequest request) throws IOException {
@@ -166,5 +182,74 @@ public class    AudioFileService {
         }
 
         return null;
+    }
+
+    public byte[] generatePdfFromSavedFileName(String savedFileName) {
+        String markdown = getMarkupBySavedFileName(savedFileName);
+        if (markdown == null) {
+            throw new EntityNotFoundException("마크다운 내용을 찾을 수 없습니다.");
+        }
+
+        String html = convertMarkdownToHtml(markdown);
+        String xhtml = wrapAsXhtml(html);
+        return convertXhtmlToPdf(xhtml);
+    }
+
+    private String getMarkupBySavedFileName(String savedFileName) {
+        return audioFileRepository.findBySavedName(savedFileName)
+                .map(AudioFileEntity::getId)
+                .flatMap(summationRepository::findByAudioId)
+                .map(SummationEntity::getSummation)
+                .orElse(null);
+    }
+
+    private String convertMarkdownToHtml(String markdown) {
+        return renderer.render(parser.parse(markdown));
+    }
+
+    private String wrapAsXhtml(String bodyHtml) {
+        return """
+                <!DOCTYPE html>
+                <html xmlns="http://www.w3.org/1999/xhtml">
+                    <head>
+                        <meta charset="UTF-8"/>
+                        <style>
+                            body { font-family: 'Noto Sans KR', sans-serif;, sans-serif; line-height: 1.6; padding: 20px; }
+                            h1, h2, h3 { color: #333333; }
+                            
+                            ul {
+                              list-style-type: disc;
+                              font-size: 12pt;
+                              margin-left: 1.5em;
+                              margin-bottom: 10px;
+                              padding-left: 0;
+                            }
+                            
+                            ul li {
+                              margin-bottom: 0.2em;
+                              font-size: 12pt;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        %s
+                    </body>
+                </html>
+                """.formatted(bodyHtml);
+    }
+
+    private byte[] convertXhtmlToPdf(String xhtml) {
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            ITextRenderer renderer = new ITextRenderer();
+            ITextFontResolver fontResolver = renderer.getFontResolver();
+            fontResolver.addFont("fonts/NotoSansKR-Regular.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+
+            renderer.setDocumentFromString(xhtml);
+            renderer.layout();
+            renderer.createPDF(outputStream);
+            return outputStream.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException("PDF 생성 중 오류 발생", e);
+        }
     }
 }

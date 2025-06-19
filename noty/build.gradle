@@ -41,6 +41,9 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
 	implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+
+	implementation 'com.vladsch.flexmark:flexmark-all:0.64.0'
+	implementation 'org.xhtmlrenderer:flying-saucer-pdf:9.1.20'
 }
 
 tasks.named('test') {
