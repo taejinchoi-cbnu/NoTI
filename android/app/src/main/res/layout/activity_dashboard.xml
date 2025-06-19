@@ -103,7 +103,7 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:layout_marginStart="12dp"
-                        android:src="@android:drawable/ic_menu_agenda" />
+                        android:src="@android:drawable/ic_menu_save" />
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
