@@ -143,6 +143,8 @@
         app:layout_constraintWidth_percent="0.9">
 
         <!-- 스크립트 뷰 -->
+
+        <!-- 요약본 뷰 -->
         <LinearLayout
             android:id="@+id/scriptContentLayout"
             android:layout_width="match_parent"
@@ -154,25 +156,25 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:gravity="center_vertical"
+                android:orientation="horizontal"
                 android:paddingBottom="8dp">
 
                 <TextView
+                    style="@style/TextBody1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="스크립트"
-                    style="@style/TextBody1" />
+                    android:text="스크립트" />
 
                 <ImageButton
                     android:id="@+id/copyScriptButton"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
+                    android:alpha="0.7"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@android:drawable/ic_menu_save"
                     android:contentDescription="복사"
-                    android:alpha="0.7" />
+                    android:src="@android:drawable/ic_menu_save" />
 
             </LinearLayout>
 
@@ -194,18 +196,17 @@
 
                 <TextView
                     android:id="@+id/scriptTextView"
+                    style="@style/TextBody1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:lineSpacingExtra="4dp"
                     android:padding="16dp"
-                    android:text=""
-                    style="@style/TextBody1"
-                    android:lineSpacingExtra="4dp" />
+                    android:text="" />
 
             </ScrollView>
 
         </LinearLayout>
 
-        <!-- 요약본 뷰 -->
         <LinearLayout
             android:id="@+id/summaryContentLayout"
             android:layout_width="match_parent"

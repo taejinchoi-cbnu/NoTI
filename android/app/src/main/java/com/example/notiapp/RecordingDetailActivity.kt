@@ -31,11 +31,23 @@ import kotlin.concurrent.thread
 // Markwon 라이브러리 import
 import io.noties.markwon.Markwon
 import io.noties.markwon.linkify.LinkifyPlugin
+// PDF 다운로드를 위한 추가 import
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Environment
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.*
 
 class RecordingDetailActivity : AppCompatActivity() {
 
     private val TAG = "RecordingDetailActivity"
     val serverIp = AddressAdmin.MY_SERVER_IP
+    
+    // 권한 요청 코드
+    private val STORAGE_PERMISSION_CODE = 1001
 
     // UI 요소 변수 선언
     private lateinit var fileNameText: TextView
@@ -270,11 +282,11 @@ class RecordingDetailActivity : AppCompatActivity() {
 
         // 복사 버튼들
         copyScriptButton.setOnClickListener {
-            copyToClipboard("스크립트", scriptData)
+            showPdfDownloadDialog()
         }
 
         copySummaryButton.setOnClickListener {
-            copyToClipboard("요약본", summaryData)
+            showPdfDownloadDialog()
         }
     }
 
@@ -479,10 +491,11 @@ class RecordingDetailActivity : AppCompatActivity() {
     private fun displaySummary(summary: String) {
         summaryLoadingProgress.visibility = View.GONE
         summaryScrollView.visibility = View.VISIBLE
+        Log.d(TAG, "요약 텍스트: $summary")
+        val summary = summary.replace("• ", "- ")
 
         // Markwon 라이브러리로 마크다운을 실제 스타일이 적용된 텍스트로 렌더링
         markwon.setMarkdown(summaryTextView, summary)
-
         Log.d(TAG, "마크다운 요약본 렌더링 완료")
     }
 
@@ -642,6 +655,220 @@ class RecordingDetailActivity : AppCompatActivity() {
         val token = sharedPreferences.getString("jwt_token", "") ?: ""
         Log.d(TAG, "JWT 토큰: ${if (token.isNotEmpty()) "존재함" else "없음"}")
         return token
+    }
+
+    /**
+     * PDF 다운로드 확인 다이얼로그 표시
+     */
+    private fun showPdfDownloadDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("PDF 저장")
+            .setMessage("녹음 요약을 PDF로 저장하시겠습니까?")
+            .setPositiveButton("예") { _, _ ->
+                if (checkStoragePermission()) {
+                    downloadPdfFromServer()
+                } else {
+                    requestStoragePermission()
+                }
+            }
+            .setNegativeButton("아니오") { _, _ ->
+                // 기존 복사 기능 실행
+                copyToClipboard("스크립트", scriptData)
+            }
+            .show()
+    }
+
+    /**
+     * 저장소 권한 확인 (Android 10+ 대응)
+     */
+    private fun checkStoragePermission(): Boolean {
+        // Android 10 (API 29) 이상에서는 앱 전용 외부 저장소를 사용하므로 권한이 필요 없음
+        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            true
+        } else {
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+        }
+    }
+
+    /**
+     * 저장소 권한 요청 (Android 9 이하에서만)
+     */
+    private fun requestStoragePermission() {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                STORAGE_PERMISSION_CODE
+            )
+        } else {
+            // Android 10 이상에서는 권한 불필요
+            downloadPdfFromServer()
+        }
+    }
+
+    /**
+     * 권한 요청 결과 처리
+     */
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            STORAGE_PERMISSION_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    downloadPdfFromServer()
+                } else {
+                    Toast.makeText(this, "저장소 권한이 필요합니다", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    /**
+     * 서버에서 PDF 다운로드
+     */
+    private fun downloadPdfFromServer() {
+        if (savedFileName.isEmpty()) {
+            Toast.makeText(this, "파일명을 찾을 수 없습니다", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val token = getJwtToken()
+        if (token.isEmpty()) {
+            Toast.makeText(this, "로그인이 필요합니다", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 로딩 다이얼로그 표시
+        val progressDialog = ProgressDialog(this).apply {
+            setMessage("PDF를 생성하고 다운로드 중...")
+            setCancelable(false)
+            show()
+        }
+
+        thread {
+            try {
+                val requestBody = FormBody.Builder()
+                    .add("savedFileName", savedFileName)
+                    .build()
+
+                val request = Request.Builder()
+                    .url("http://${serverIp}/file/pdf")
+                    .post(requestBody)
+                    .header("Authorization", "Bearer $token")
+                    .build()
+
+                client.newCall(request).execute().use { response ->
+                    val responseCode = response.code
+                    val pdfBytes = if (response.isSuccessful) {
+                        response.body?.bytes()
+                    } else {
+                        null
+                    }
+                    
+                    runOnUiThread {
+                        progressDialog.dismiss()
+                        
+                        if (response.isSuccessful && pdfBytes != null) {
+                            savePdfToDownloads(pdfBytes)
+                        } else if (response.isSuccessful && pdfBytes == null) {
+                            Toast.makeText(this, "PDF 데이터를 받을 수 없습니다", Toast.LENGTH_SHORT).show()
+                        } else {
+                            when (responseCode) {
+                                401, 403 -> Toast.makeText(this, "인증이 필요합니다. 다시 로그인해주세요", Toast.LENGTH_LONG).show()
+                                404 -> Toast.makeText(this, "파일을 찾을 수 없습니다", Toast.LENGTH_SHORT).show()
+                                500 -> Toast.makeText(this, "서버 오류가 발생했습니다", Toast.LENGTH_SHORT).show()
+                                else -> Toast.makeText(this, "PDF 생성에 실패했습니다: $responseCode", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "PDF 다운로드 오류: ${e.message}", e)
+                runOnUiThread {
+                    progressDialog.dismiss()
+                    Toast.makeText(this, "네트워크 오류가 발생했습니다: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
+    /**
+     * PDF 파일을 저장 (Android 버전별 대응)
+     */
+    private fun savePdfToDownloads(pdfBytes: ByteArray) {
+        try {
+            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+            val cleanFileName = fileName.replace(".mp3", "").replace(".wav", "")
+            val pdfFileName = "요약_${cleanFileName}_${timestamp}.pdf"
+            
+            val savedFile = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                // Android 10 이상: 앱 전용 외부 저장소 사용
+                saveToAppExternalStorage(pdfBytes, pdfFileName)
+            } else {
+                // Android 9 이하: 공용 Downloads 폴더 사용
+                saveToPublicDownloads(pdfBytes, pdfFileName)
+            }
+
+            if (savedFile != null) {
+                Log.d(TAG, "PDF 저장 성공: ${savedFile.absolutePath}")
+                Toast.makeText(this, "PDF가 저장되었습니다\n위치: ${savedFile.absolutePath}", Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this, "PDF 저장에 실패했습니다", Toast.LENGTH_SHORT).show()
+            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "PDF 저장 오류: ${e.message}", e)
+            Toast.makeText(this, "PDF 저장에 실패했습니다: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    /**
+     * 앱 전용 외부 저장소에 저장 (Android 10+)
+     */
+    private fun saveToAppExternalStorage(pdfBytes: ByteArray, fileName: String): File? {
+        return try {
+            // 앱 전용 외부 저장소의 Documents 폴더 사용
+            val documentsDir = File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "PDFs")
+            if (!documentsDir.exists()) {
+                documentsDir.mkdirs()
+            }
+            
+            val pdfFile = File(documentsDir, fileName)
+            FileOutputStream(pdfFile).use { fos ->
+                fos.write(pdfBytes)
+            }
+            pdfFile
+        } catch (e: Exception) {
+            Log.e(TAG, "앱 전용 저장소 저장 실패: ${e.message}", e)
+            null
+        }
+    }
+
+    /**
+     * 공용 Downloads 폴더에 저장 (Android 9 이하)
+     */
+    private fun saveToPublicDownloads(pdfBytes: ByteArray, fileName: String): File? {
+        return try {
+            val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            if (!downloadsDir.exists()) {
+                downloadsDir.mkdirs()
+            }
+            
+            val pdfFile = File(downloadsDir, fileName)
+            FileOutputStream(pdfFile).use { fos ->
+                fos.write(pdfBytes)
+            }
+            pdfFile
+        } catch (e: Exception) {
+            Log.e(TAG, "공용 Downloads 저장 실패: ${e.message}", e)
+            null
+        }
     }
 
     override fun onPause() {
