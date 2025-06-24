@@ -6,6 +6,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import androidx.core.content.FileProvider
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
@@ -31,6 +32,10 @@ import kotlin.concurrent.thread
 // Markwon 라이브러리 import
 import io.noties.markwon.Markwon
 import io.noties.markwon.linkify.LinkifyPlugin
+// PDF 공유를 위한 추가 import
+import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.*
 
 class RecordingDetailActivity : AppCompatActivity() {
 
@@ -268,13 +273,13 @@ class RecordingDetailActivity : AppCompatActivity() {
             }
         }
 
-        // 복사 버튼들
+        // 공유 버튼들
         copyScriptButton.setOnClickListener {
-            copyToClipboard("스크립트", scriptData)
+            showPdfShareDialog()
         }
 
         copySummaryButton.setOnClickListener {
-            copyToClipboard("요약본", summaryData)
+            showPdfShareDialog()
         }
     }
 
@@ -479,10 +484,11 @@ class RecordingDetailActivity : AppCompatActivity() {
     private fun displaySummary(summary: String) {
         summaryLoadingProgress.visibility = View.GONE
         summaryScrollView.visibility = View.VISIBLE
+        Log.d(TAG, "요약 텍스트: $summary")
+        val summary = summary.replace("• ", "- ")
 
         // Markwon 라이브러리로 마크다운을 실제 스타일이 적용된 텍스트로 렌더링
         markwon.setMarkdown(summaryTextView, summary)
-
         Log.d(TAG, "마크다운 요약본 렌더링 완료")
     }
 
@@ -642,6 +648,157 @@ class RecordingDetailActivity : AppCompatActivity() {
         val token = sharedPreferences.getString("jwt_token", "") ?: ""
         Log.d(TAG, "JWT 토큰: ${if (token.isNotEmpty()) "존재함" else "없음"}")
         return token
+    }
+
+    /**
+     * PDF 공유 확인 다이얼로그 표시
+     */
+    private fun showPdfShareDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("PDF 공유")
+            .setMessage("녹음 요약을 PDF로 생성하여 공유하시겠습니까?")
+            .setPositiveButton("예") { _, _ ->
+                generateAndSharePdf()
+            }
+            .setNegativeButton("아니오") { _, _ ->
+                // 기존 복사 기능 실행
+                copyToClipboard("스크립트", scriptData)
+            }
+            .show()
+    }
+
+
+    /**
+     * 서버에서 PDF 생성 후 공유
+     */
+    private fun generateAndSharePdf() {
+        if (savedFileName.isEmpty()) {
+            Toast.makeText(this, "파일명을 찾을 수 없습니다", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val token = getJwtToken()
+        if (token.isEmpty()) {
+            Toast.makeText(this, "로그인이 필요합니다", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 로딩 다이얼로그 표시
+        val progressDialog = ProgressDialog(this).apply {
+            setMessage("PDF를 생성하고 있습니다...")
+            setCancelable(false)
+            show()
+        }
+
+        thread {
+            try {
+                val requestBody = FormBody.Builder()
+                    .add("savedFileName", savedFileName)
+                    .build()
+
+                val request = Request.Builder()
+                    .url("http://${serverIp}/file/pdf")
+                    .post(requestBody)
+                    .header("Authorization", "Bearer $token")
+                    .build()
+
+                client.newCall(request).execute().use { response ->
+                    val responseCode = response.code
+                    val pdfBytes = if (response.isSuccessful) {
+                        response.body?.bytes()
+                    } else {
+                        null
+                    }
+                    
+                    runOnUiThread {
+                        progressDialog.dismiss()
+                        
+                        if (response.isSuccessful && pdfBytes != null) {
+                            savePdfAndShare(pdfBytes)
+                        } else if (response.isSuccessful && pdfBytes == null) {
+                            Toast.makeText(this, "PDF 데이터를 받을 수 없습니다", Toast.LENGTH_SHORT).show()
+                        } else {
+                            when (responseCode) {
+                                401, 403 -> Toast.makeText(this, "인증이 필요합니다. 다시 로그인해주세요", Toast.LENGTH_LONG).show()
+                                404 -> Toast.makeText(this, "파일을 찾을 수 없습니다", Toast.LENGTH_SHORT).show()
+                                500 -> Toast.makeText(this, "서버 오류가 발생했습니다", Toast.LENGTH_SHORT).show()
+                                else -> Toast.makeText(this, "PDF 생성에 실패했습니다: $responseCode", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "PDF 다운로드 오류: ${e.message}", e)
+                runOnUiThread {
+                    progressDialog.dismiss()
+                    Toast.makeText(this, "네트워크 오류가 발생했습니다: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
+    /**
+     * PDF 파일을 임시 저장 후 공유
+     */
+    private fun savePdfAndShare(pdfBytes: ByteArray) {
+        try {
+            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+            val cleanFileName = fileName.replace(".mp3", "").replace(".wav", "")
+            val pdfFileName = "요약_${cleanFileName}_${timestamp}.pdf"
+            
+            // 임시 파일을 앱 캐시 디렉토리에 저장
+            val cacheDir = File(cacheDir, "shared_pdfs")
+            if (!cacheDir.exists()) {
+                cacheDir.mkdirs()
+            }
+            
+            val pdfFile = File(cacheDir, pdfFileName)
+            FileOutputStream(pdfFile).use { fos ->
+                fos.write(pdfBytes)
+            }
+            
+            if (pdfFile.exists()) {
+                Log.d(TAG, "PDF 생성 성공: ${pdfFile.absolutePath}")
+                sharePdfFile(pdfFile)
+            } else {
+                Toast.makeText(this, "PDF 생성에 실패했습니다", Toast.LENGTH_SHORT).show()
+            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "PDF 생성 오류: ${e.message}", e)
+            Toast.makeText(this, "PDF 생성에 실패했습니다: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    /**
+     * PDF 파일 공유
+     */
+    private fun sharePdfFile(pdfFile: File) {
+        try {
+            val pdfUri = FileProvider.getUriForFile(
+                this,
+                "${packageName}.fileprovider",
+                pdfFile
+            )
+            
+            val shareIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                type = "application/pdf"
+                putExtra(Intent.EXTRA_STREAM, pdfUri)
+                putExtra(Intent.EXTRA_SUBJECT, "녹음 요약 - ${fileName}")
+                putExtra(Intent.EXTRA_TEXT, "녹음 파일의 요약 내용입니다.")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            
+            val chooserIntent = Intent.createChooser(shareIntent, "PDF 공유 방법 선택")
+            startActivity(chooserIntent)
+            
+            Log.d(TAG, "PDF 공유 시작: ${pdfFile.name}")
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "PDF 공유 오류: ${e.message}", e)
+            Toast.makeText(this, "PDF 공유에 실패했습니다: ${e.message}", Toast.LENGTH_LONG).show()
+        }
     }
 
     override fun onPause() {

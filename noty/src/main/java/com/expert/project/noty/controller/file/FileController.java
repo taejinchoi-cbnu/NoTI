@@ -10,10 +10,7 @@ import com.expert.project.noty.service.ai.GeminiService;
 import com.expert.project.noty.service.ai.WhisperService;
 import com.expert.project.noty.service.file.AudioFileService;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -116,4 +113,26 @@ public class FileController {
                 .header(HttpHeaders.CONTENT_DISPOSITION)
                 .body(resource);
     }
+
+    @PostMapping("/pdf")
+    public ResponseEntity<byte[]> generatePdf(
+            @RequestParam("savedFileName") String savedFileName ) throws IOException {
+
+        byte[] pdfBytes = audioFileService.generatePdfFromSavedFileName(savedFileName);
+
+        if (pdfBytes == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        String input = savedFileName;
+        String[] parts = input.split("_");
+
+        String filename = parts.length > 1 ? parts[1] : "";
+        headers.setContentDisposition(ContentDisposition.attachment().filename(filename + ".pdf").build());
+
+        return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+    }
+
 }
